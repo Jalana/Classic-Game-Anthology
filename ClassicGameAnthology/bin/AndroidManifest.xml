@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="tru.kyle.classicgameanthology"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+<!-- 	<uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" /> -->
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainMenuActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ConnectFourActivity"
+            android:label="@string/title_activity_connect_four" >
+        </activity>
+        <activity
+            android:name=".PenteActivity"
+            android:label="@string/title_activity_pente" >
+        </activity>
+        <activity
+            android:name=".ReversiActivity"
+            android:label="@string/title_activity_reversi" >
+        </activity>
+        <activity
+            android:name=".PlayerManagementActivity"
+            android:label="@string/title_activity_player_management" >
+        </activity>
+        <activity
+            android:name=".ViewStandingsActivity"
+            android:label="@string/title_activity_view_standings" >
+        </activity>
+        <activity
+            android:name=".MastermindActivity"
+            android:label="@string/title_activity_mastermind" >
+        </activity>
+    </application>
+
+</manifest>

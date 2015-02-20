@@ -1,0 +1,180 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="tru.kyle.classicgameanthology.MainMenuActivity"
+    android:background="@drawable/normal_background"
+     >
+
+    <TextView
+        android:id="@+id/centerPoint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text=""
+        android:textSize="12sp"
+         />
+
+    <Spinner
+        android:id="@+id/main_menu_firstPlayerSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/main_menu_playerHintText"
+        android:layout_toLeftOf="@+id/centerPoint" />
+    
+    <Spinner
+        android:id="@+id/main_menu_secondPlayerSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/centerPoint"
+        android:layout_below="@+id/main_menu_firstPlayerSpinner" />
+
+    <Button
+        android:id="@+id/main_menu_goToPlayers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text=" Player \n Options? "
+        android:textSize="19sp"
+        android:background="@drawable/button_border_menu_red" />
+
+    <Spinner
+        android:id="@+id/main_menu_savedGamesSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/main_menu_goToPlayers"
+        android:layout_toLeftOf="@+id/main_menu_goToPlayers" />
+
+    <TextView
+        android:id="@+id/main_menu_topText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text=" Game: "
+        android:textSize="23sp" />
+
+    <Spinner
+        android:id="@+id/main_menu_gameSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/main_menu_firstPlayerSpinner"
+        android:layout_below="@+id/main_menu_topText" />
+
+    <TextView
+        android:id="@+id/main_menu_playerHintText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/main_menu_gameSpinner"
+        android:text=" Players: "
+        android:textSize="20sp" />
+    
+
+    <Button
+        android:id="@+id/main_menu_newMatch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/main_menu_secondPlayerSpinner"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/button_border_menu_blue"
+        android:text=" New Match "
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/main_menu_extrasHintText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text=" Other Options: "
+        android:textSize="25sp" />
+
+    <LinearLayout
+        android:id="@+id/extrasLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/main_menu_extrasHintText"
+        android:layout_toRightOf="@+id/centerPoint"
+        android:orientation="vertical" >
+
+        <CheckedTextView
+            android:id="@+id/main_menu_extrasCheckedView_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:checkMark="@drawable/main_menu_checkbox"
+            android:checked="false"
+            android:text="@string/extras_box_1"
+            android:textSize="17sp" />
+
+        <CheckedTextView
+            android:id="@+id/main_menu_extrasCheckedView_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:checkMark="@drawable/main_menu_checkbox"
+            android:checked="false"
+            android:text="@string/extras_box_2"
+            android:textSize="17sp" />
+
+        <Spinner
+            android:id="@+id/main_menu_extrasSpinner_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/main_menu_extrasSpinner_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/main_menu_extrasSpinner_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        
+	</LinearLayout>
+
+    <Button
+        android:id="@+id/main_menu_loadSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/main_menu_savedGamesSpinner"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/button_border_menu_blue"
+        android:text=" Load? "
+        android:textSize="19sp" />
+
+    <Button
+        android:id="@+id/main_menu_deleteSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/main_menu_savedGamesSpinner"
+        android:layout_toRightOf="@+id/main_menu_loadSave"
+        android:background="@drawable/button_border_menu_red"
+        android:text=" Delete? "
+        android:textSize="19sp" />
+
+    <TextView
+        android:id="@+id/main_menu_saveGameHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/main_menu_loadSave"
+        android:layout_alignParentLeft="true"
+        android:text=" Select Saved Game? "
+        android:textSize="20sp" />
+
+</RelativeLayout>
