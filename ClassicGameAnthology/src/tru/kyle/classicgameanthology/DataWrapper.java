@@ -1,5 +1,7 @@
 package tru.kyle.classicgameanthology;
 
+//This class has been deprecated, and is no longer in use for the main program.
+
 public class DataWrapper 
 {
 	public int[][] values;

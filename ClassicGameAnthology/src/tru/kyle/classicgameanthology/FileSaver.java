@@ -1,5 +1,23 @@
 package tru.kyle.classicgameanthology;
 
+/*
+This file (FileSaver) is a part of the Classic Game Anthology application.
+Copyright (C) <2015>  <Connor Kyle>
+
+The Classic Game Anthology is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Classic Game Anthology is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import tru.kyle.mylists.*;
 
 import java.io.BufferedReader;
@@ -12,6 +30,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.content.Context;
+
+//This class has been largely deprecated.
+//Apart from the constant values, it is not used, so its functions are ignored.
 
 public class FileSaver 
 {
@@ -57,13 +78,6 @@ public class FileSaver
 		filename = corePlayerName;
 		type = SaveType.PLAYERS;
 	}
-	
-	//public FileSaver(Game currentGame, SaveType newType)
-	//{
-	//	filename = "";
-	//	type = newType;
-	//	game = currentGame;
-	//}
 	
 	public void writeToFileLineBased(Context c, int[][] values, int currentPlayer, 
 			int turnCount, String[] players, Game g)
@@ -249,16 +263,6 @@ public class FileSaver
 			for (int count2 = 0; count2 < temp.length; count2++)
 			{
 				temp2 = temp[count2].split(":");
-				if (Integer.parseInt(temp2[0]) == 0)
-				{
-					//buttons[count3][count2].setClickable(false);
-					//buttons[count3][count2].setBackgroundColor(Color.WHITE);
-				}
-				else
-				{
-					//buttons[count3][count2].setClickable(true);
-					//buttons[count3][count2].setBackgroundColor(Color.BLACK);
-				}
 				tempValue = Integer.parseInt(temp2[1]);
 				pointsPlaced[count3][count2] = tempValue;
 			}
@@ -271,59 +275,44 @@ public class FileSaver
 	private static void addFile(Context c, Game g, String name)
 	{
 		MyQueue<String> queue = new MyQueue<String>();
-		//String temp;
 		String[] filenames;
 		boolean isPresent = false;
 		
-		//temp = assembleFileName(FileSaver.PLAYER_FILE_STORAGE, SaveType.DATA, g);
-		//File storageFile = new File(c.getApplicationContext().getFilesDir(), temp);
-		//FileInputStream tempWriter;
-		
-		//try 
-		//{
-			//BufferedWriter storageWriter = new BufferedWriter(new FileWriter(storageFile, false));
-			filenames = getFilenames(c, g);
-			if (filenames == null)
-			{
-				filenames = new String[] {name};
-				writeFilenames(c, filenames, g);
-				return;
-			}
-			
-			for (int count = 0; count < filenames.length; count++)
-			{
-				if (checkFile(c, filenames[count], SaveType.GAMES, g) == false)
-				{
-					filenames[count] = null;
-				}
-				
-				if (filenames[count] != null)
-				{
-					queue.enqueue(filenames[count]);
-				}
-				if (isPresent == true || name.equalsIgnoreCase(filenames[count]))
-				{
-					isPresent = true;
-				}
-			}
-			if (isPresent == false)
-			{
-				queue.enqueue(name);
-				//appendToFile(c, "\n" + name, temp);
-			}
-			//storageWriter.close();
-			filenames = new String[queue.size()];
-			
-			for (int count = 0; count < filenames.length; count++)
-			{
-				filenames[count] = queue.dequeue();
-			}
+		filenames = getFilenames(c, g);
+		if (filenames == null)
+		{
+			filenames = new String[] {name};
 			writeFilenames(c, filenames, g);
-		//}
-		//catch (IOException e) 
-		//{
-		//	e.printStackTrace();
-		//}
+			return;
+		}
+		
+		for (int count = 0; count < filenames.length; count++)
+		{
+			if (checkFile(c, filenames[count], SaveType.GAMES, g) == false)
+			{
+				filenames[count] = null;
+			}
+			
+			if (filenames[count] != null)
+			{
+				queue.enqueue(filenames[count]);
+			}
+			if (isPresent == true || name.equalsIgnoreCase(filenames[count]))
+			{
+				isPresent = true;
+			}
+		}
+		if (isPresent == false)
+		{
+			queue.enqueue(name);
+		}
+		filenames = new String[queue.size()];
+		
+		for (int count = 0; count < filenames.length; count++)
+		{
+			filenames[count] = queue.dequeue();
+		}
+		writeFilenames(c, filenames, g);
 	}
 	
 	protected static void writeFilenames(Context c, String[] names, Game g)
@@ -445,8 +434,6 @@ public class FileSaver
 	public static void deleteSave(Context c, String file, SaveType t, Game g)
 	{
 		c.deleteFile(assembleFileName(file, t, g));
-		//File deleted = new File(c.getApplicationContext().getFilesDir(), assembleFileName(file, t, g));
-		//deleted.delete();
 	}
 	
 	public static void appendToFile(Context c, String text, String name, SaveType t, Game g)
@@ -487,7 +474,6 @@ public class FileSaver
 		{
 			if (g == null)
 			{
-				//result = coreName;
 				result = FileSaver.PLAYER_FILE_STORAGE;
 			}
 			else
@@ -499,15 +485,8 @@ public class FileSaver
 		else
 		{
 			result = GameByLayout.values()[g.ordinal()].toString();
-			//if (t == SaveType.GAMES)
-			//{
-				result += FileSaver.SPECIFIC_SAVE_PREFIX;
-				result += coreName;
-			//}
-			//else
-			//{
-			//	result += FileSaver.SAVE_GAME_FILE_STORAGE;
-			//}
+			result += FileSaver.SPECIFIC_SAVE_PREFIX;
+			result += coreName;
 		}
 		result += FileSaver.GLOBAL_SUFFIX;
 		return result;
@@ -515,7 +494,6 @@ public class FileSaver
 	
 	public static void writePlayersToFile(Context c, Player[] players)
 	{
-		//File playerFile;
 		File storageFile = new File(c.getApplicationContext().getFilesDir(), 
 				assembleFileName(FileSaver.PLAYER_FILE_STORAGE, SaveType.DATA, null));
 		Player tempPlayer;
@@ -537,9 +515,6 @@ public class FileSaver
 		{
 			e.printStackTrace();
 		}
-		
-		//BufferedWriter writer;
-		//String temp;
 		
 		for (int count = 0; count < players.length; count++)
 		{

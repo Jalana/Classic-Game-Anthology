@@ -1,5 +1,22 @@
 package tru.kyle.classicgameanthology;
 
+/*
+This file (ReversiActivity) is a part of the Classic Game Anthology application.
+Copyright (C) <2015>  <Connor Kyle>
+
+The Classic Game Anthology is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Classic Game Anthology is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import tru.kyle.classicgameanthology.FileSaver.CaptureType;
 import tru.kyle.classicgameanthology.FileSaver.Game;
@@ -7,11 +24,6 @@ import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
 import tru.kyle.databases.DBInterface;
 
 import tru.kyle.mylists.*;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -507,51 +519,6 @@ public class ReversiActivity extends Activity
 	}
 	
 	
-	
-	
-	//This function takes the data from the game data file as a string array.
-	//It sets the current turn and turn count.
-	//It then iterates through the buttons[][] array.
-	//At each row of the array, the string from that index of the provided string array is split by spacing.
-	//At each index of the array, the immediate string is split by a colon to separate the button status
-	//		value from the value that should be stored in the pointsPlaced[][] array. Both are set accordingly.
-	public void setGameDataFromFile(DataWrapper data)
-	{
-		pointsPlaced = data.values;
-		currentTurn = data.player;
-		turnCount = data.turnCount;
-		playerOneName = data.playerNames[0];
-		playerTwoName = data.playerNames[1];
-		captures = data.captures;
-		
-		try
-		{
-			playerOne = FileSaver.readPlayerFromFile(getApplicationContext(), playerOneName);
-			playerTwo = FileSaver.readPlayerFromFile(getApplicationContext(), playerTwoName);
-		}
-		catch (FileNotFoundException f)
-		{
-			useGuestNames();
-		}
-		
-		for (int count3 = 0; count3 < pointsPlaced.length; count3++)
-		{
-			for (int count2 = 0; count2 < pointsPlaced[count3].length; count2++)
-			{
-				if (pointsPlaced[count3][count2] != 0)
-				{
-					buttons[count3][count2].setClickable(false);
-					//buttons[count3][count2].setBackgroundColor(Color.WHITE);
-					addMark(pointsPlaced[count3][count2], buttons[count3][count2]);
-				}
-				else
-				{
-					buttons[count3][count2].setClickable(true);
-					//buttons[count3][count2].setBackgroundColor(Color.BLACK);
-				}
-			}
-		}
-	}
 	
 	
 	
@@ -1234,15 +1201,16 @@ public class ReversiActivity extends Activity
 		//It then goes to onStart() and onResume().
 	}
 
-    @Override
+	@Override
     public boolean onOptionsItemSelected(MenuItem item) 
     {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) 
+        if (id == R.id.action_menu_about) 
         {
+        	AboutMenu.displayAboutDialog(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

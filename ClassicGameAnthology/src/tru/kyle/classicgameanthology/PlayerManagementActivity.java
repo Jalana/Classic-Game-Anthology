@@ -1,5 +1,23 @@
 package tru.kyle.classicgameanthology;
 
+/*
+This file (PlayerManagementActivity) is a part of the Classic Game Anthology application.
+Copyright (C) <2015>  <Connor Kyle>
+
+The Classic Game Anthology is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Classic Game Anthology is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +41,6 @@ import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -145,18 +162,19 @@ public class PlayerManagementActivity extends Activity
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) 
-	{
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) 
-		{
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    public boolean onOptionsItemSelected(MenuItem item) 
+    {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_menu_about) 
+        {
+        	AboutMenu.displayAboutDialog(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 	
 	
 	

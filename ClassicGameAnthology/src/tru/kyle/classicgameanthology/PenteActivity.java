@@ -1,15 +1,29 @@
 package tru.kyle.classicgameanthology;
 
+/*
+This file (PenteActivity) is a part of the Classic Game Anthology application.
+Copyright (C) <2015>  <Connor Kyle>
+
+The Classic Game Anthology is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The Classic Game Anthology is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import tru.kyle.classicgameanthology.FileSaver.CaptureType;
 import tru.kyle.classicgameanthology.FileSaver.Game;
 import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
 import tru.kyle.databases.DBInterface;
 
 import tru.kyle.mylists.*;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,21 +49,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-/*
- * This game needs to allow smaller grid sizes to be selected.
- * 		15x15 is the default, but ideally this game should also support 11x11, 13x13, and even 9x9.
- * How to allow the player to select grid size?
- * 		-Select it when the game starts through a dialog window?
- * 			-This selection would be disabled if a saved game was being loaded.
- * 			-Note that the onCreate() and onResume() functions might need serious changes to make this work properly.
- * 		-Force a selection at the main menu, before the game is launched?
- * 			-Would there have to be a special spinner added to the main menu to allow option selection?
- * 			-Would there be a dialog there (instead of within the game) to force option selection?
- * 			-Note that coding in special exceptions for specific games to allow such option selection could 
- * 				make the code that much harder to read and edit in the future. Still, it might be the best option.
- * 		-Avoid launching a new activity for this purpose; it is utterly unnecessary.
- */
 
 public class PenteActivity extends Activity 
 {
@@ -1280,15 +1279,16 @@ public class PenteActivity extends Activity
 		//It then goes to onStart() and onResume().
 	}
 
-    @Override
+	@Override
     public boolean onOptionsItemSelected(MenuItem item) 
     {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) 
+        if (id == R.id.action_menu_about) 
         {
+        	AboutMenu.displayAboutDialog(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

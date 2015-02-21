@@ -63,7 +63,7 @@ public final class R {
         public static final int normal_background=0x7f020020;
     }
     public static final class id {
-        public static final int action_settings=0x7f0a0167;
+        public static final int action_menu_about=0x7f0a0167;
         public static final int activePlayer=0x7f0a000d;
         public static final int addPlayer=0x7f0a0160;
         public static final int button_01_01=0x7f0a000e;
@@ -453,7 +453,7 @@ public final class R {
         public static final int fireworks_finale=0x7f040002;
     }
     public static final class string {
-        public static final int action_settings=0x7f060002;
+        public static final int action_menu_about=0x7f060002;
         public static final int app_name=0x7f060000;
         public static final int button_01_01=0x7f060024;
         public static final int button_01_02=0x7f060025;
