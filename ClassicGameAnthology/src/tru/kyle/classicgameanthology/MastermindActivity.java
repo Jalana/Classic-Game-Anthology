@@ -349,6 +349,23 @@ public class MastermindActivity extends Activity
 			codeButtons[count].setLayoutParams(params);
 		}
 		
+		if (canHaveDuplicates == true)
+		{
+			duplicateHintDisplay.setText("Duplicates\nare allowed");
+		}
+		else
+		{
+			duplicateHintDisplay.setText("Duplicates\nare banned");
+		}
+		if (isEasyDifficulty == true)
+		{
+			easyModeHintDisplay.setText("Easy\nDifficulty");
+		}
+		else
+		{
+			easyModeHintDisplay.setText("Normal\nDifficulty");
+		}
+		
 		Log.d("Life Cycle", "Mastermind Activity: onResume");
 		
 		if (endOfMatch == false)
@@ -398,23 +415,7 @@ public class MastermindActivity extends Activity
 	private void parseExtras(Intent intent)
 	{
 		canHaveDuplicates = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "1", false);
-		if (canHaveDuplicates == true)
-		{
-			duplicateHintDisplay.setText("Duplicates\nare allowed");
-		}
-		else
-		{
-			duplicateHintDisplay.setText("Duplicates\nare banned");
-		}
 		isEasyDifficulty = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "2", false);
-		if (isEasyDifficulty == true)
-		{
-			easyModeHintDisplay.setText("Easy\nDifficulty");
-		}
-		else
-		{
-			easyModeHintDisplay.setText("Normal\nDifficulty");
-		}
 		
 		switch (intent.getStringExtra(MainMenuActivity.EXTRA_STRING_BASE_KEY + "1"))
 		{
@@ -1489,7 +1490,7 @@ public class MastermindActivity extends Activity
         int id = item.getItemId();
         if (id == R.id.action_menu_about) 
         {
-        	AboutMenu.displayAboutDialog(this);
+        	ActionMenu.displayAboutDialog(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -1092,7 +1092,7 @@ public class ConnectFourActivity extends Activity
         int id = item.getItemId();
         if (id == R.id.action_menu_about) 
         {
-        	AboutMenu.displayAboutDialog(this);
+        	ActionMenu.displayAboutDialog(this);
             return true;
         }
         return super.onOptionsItemSelected(item);
