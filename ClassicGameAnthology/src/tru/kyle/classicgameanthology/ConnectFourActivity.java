@@ -23,11 +23,6 @@ import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
 import tru.kyle.databases.DBInterface;
 import tru.kyle.mylists.MyQueue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -51,6 +46,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +91,7 @@ public class ConnectFourActivity extends Activity
 	TextView activePlayerDisplay;
 	
 	MediaPlayer soundPlayer;
+	RelativeLayout mainLayout;
 	
 	Player playerOne;
 	Player playerTwo;
@@ -928,38 +925,15 @@ public class ConnectFourActivity extends Activity
     	final String temp2 = temp;
     	Toast.makeText(this, temp2, Toast.LENGTH_SHORT).show();
     	
-    	//An alternative is needed to the countdown timer; 
-    	//		it can crash the app if the screen is rotated at the wrong time.
-    	//	Possible solution: changing the countdown to an event that creates the dialog when the screen is next tapped?
-    	//http://stackoverflow.com/questions/10126268/howto-fire-a-event-when-someone-click-anywhere-on-the-screen-in-a-android-app
-    	new CountDownTimer(3500, 2500)
-    	{
-			@Override
-			public void onTick(long millisUntilFinished) 
-			{
-				
-			}
-
-			@Override
-			public void onFinish() 
-			{
-				AlertDialog.Builder endMatchBuilder = new AlertDialog.Builder(ConnectFourActivity.this);
-				endMatchBuilder.setTitle("The match has ended");
-				endMatchBuilder.setMessage(temp2);
-				endMatchBuilder.setCancelable(false);
-				endMatchBuilder.setNeutralButton("Return to Main Menu", endMatch);
-				
-				endMatchDialog = endMatchBuilder.create();
-				endMatchDialog.show();
-			}
-    	}.start();
+    	mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
+    	mainLayout.setOnClickListener(endMatch);
     }
     
-    //This is the dialog called when the match is finished.
+    //This is the listener called when the match is finished and the user taps the screen.
     //It releases the sound player and launches the main menu, then destroys this activity.
-    private DialogInterface.OnClickListener endMatch = new DialogInterface.OnClickListener() 
+    private View.OnClickListener endMatch = new View.OnClickListener() 
 	{
-		public void onClick(DialogInterface dialog,int id) 
+		public void onClick(View v) 
 		{
 			if (soundPlayer != null)
 			{
@@ -974,12 +948,7 @@ public class ConnectFourActivity extends Activity
 					
 				}
 			}
-			dialog.dismiss();
-			
-			//Reconsider this part; it may be enough just to close the activity
-			//	provided that the app can return to the main menu on its own.
-			Intent intent = new Intent(ConnectFourActivity.this, MainMenuActivity.class);
-			startActivity(intent);
+			mainLayout.setOnClickListener(null);
 			ConnectFourActivity.this.finish();
 		}
 	};

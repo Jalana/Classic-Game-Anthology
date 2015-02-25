@@ -165,23 +165,4 @@ public class DBInterface
 		return fullKey;
 		//return new String(fullKey.substring(DBInterface.PACKAGE_NAME.length()));
 	}
-	
-	/*
-	private static Class<?> getManager(Game game)
-	{
-		String className = DBInterface.ANTHOLOGY_PACKAGE_NAME;
-		className += game.toString();
-		className += "Manager";
-		try 
-		{
-			return (Class<?>) Class.forName(className);
-		} 
-		catch (ClassNotFoundException e) 
-		{
-			Log.d(LOGTAG, "Unable to find class name.");
-			e.printStackTrace();
-			return null;
-		}
-	}
-	*/
 }

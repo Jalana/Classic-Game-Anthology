@@ -47,6 +47,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -106,6 +107,7 @@ public class PenteActivity extends Activity
 	TextView playerTwoCaptureDisplay;
 	
 	MediaPlayer soundPlayer;
+	RelativeLayout mainLayout;
 	
 	Player playerOne;
 	Player playerTwo;
@@ -1131,34 +1133,16 @@ public class PenteActivity extends Activity
     	endOfMatch = true;
     	final String temp2 = temp;
     	Toast.makeText(this, temp2, Toast.LENGTH_SHORT).show();
-    	new CountDownTimer(3500, 2500)
-    	{
-			@Override
-			public void onTick(long millisUntilFinished) 
-			{
-				
-			}
 
-			@Override
-			public void onFinish() 
-			{
-				AlertDialog.Builder endMatchBuilder = new AlertDialog.Builder(PenteActivity.this);
-				endMatchBuilder.setTitle("The match has ended");
-				endMatchBuilder.setMessage(temp2);
-				endMatchBuilder.setCancelable(false);
-				endMatchBuilder.setNeutralButton("Return to Main Menu", endMatch);
-				
-				endMatchDialog = endMatchBuilder.create();
-				endMatchDialog.show();
-			}
-    	}.start();
+    	mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
+    	mainLayout.setOnClickListener(endMatch);
     }
     
-    //This is the dialog called when the match is finished.
+    //This is the listener called when the match is finished and the user taps the screen.
     //It releases the sound player and launches the main menu, then destroys this activity.
-    private DialogInterface.OnClickListener endMatch = new DialogInterface.OnClickListener() 
+    private View.OnClickListener endMatch = new View.OnClickListener() 
 	{
-		public void onClick(DialogInterface dialog,int id) 
+		public void onClick(View v) 
 		{
 			if (soundPlayer != null)
 			{
@@ -1173,13 +1157,11 @@ public class PenteActivity extends Activity
 					
 				}
 			}
-			endMatchDialog.dismiss();
-			Intent intent = new Intent(PenteActivity.this, MainMenuActivity.class);
-			startActivity(intent);
+			mainLayout.setOnClickListener(null);
 			PenteActivity.this.finish();
 		}
 	};
-    
+	
 	//This function takes the winner as a boolean and prints the appropriate player's name.
 	//It declares that player the winner, complete with the sound of fireworks.
 	//It then calls endOfMatch() with an integer representing who won.

@@ -35,7 +35,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -51,6 +50,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -133,6 +133,7 @@ public class MastermindActivity extends Activity
 	TextView activePlayerDisplay;
 	
 	MediaPlayer soundPlayer;
+	RelativeLayout mainLayout;
 	
 	Player playerOne;
 	Player playerTwo;
@@ -370,6 +371,7 @@ public class MastermindActivity extends Activity
 		
 		if (endOfMatch == false)
 		{
+			activePlayerDisplay.setText("");
 			gameInProgress = true;
 		}
 		
@@ -1342,13 +1344,14 @@ public class MastermindActivity extends Activity
     		temp = "You failed to crack the code.";
     		winners = null;
     	}
+    	activePlayerDisplay.setText(temp);
     	
     	if (usingGuestNames == false)
     	{
     		DBInterface.updatePlayerScores(getApplicationContext(), 
     				new String[]{playerOneName}, THIS_GAME, winners);
     	}
-    	final String temp2 = temp;
+    	//final String temp2 = temp;
     	//Toast.makeText(this, temp2, Toast.LENGTH_SHORT).show();
     	//activePlayer.setText(temp2);
     	
@@ -1356,34 +1359,15 @@ public class MastermindActivity extends Activity
     	canPressButton = false;
     	endOfMatch = true;
     	
-    	new CountDownTimer(5500, 4500)
-    	{
-			@Override
-			public void onTick(long millisUntilFinished) 
-			{
-				
-			}
-
-			@Override
-			public void onFinish() 
-			{
-				AlertDialog.Builder endMatchBuilder = new AlertDialog.Builder(MastermindActivity.this);
-				endMatchBuilder.setTitle("The match has ended");
-				endMatchBuilder.setMessage(temp2);
-				endMatchBuilder.setCancelable(false);
-				endMatchBuilder.setNeutralButton("Return to Main Menu", endMatch);
-				
-				endMatchDialog = endMatchBuilder.create();
-				endMatchDialog.show();
-			}
-    	}.start();
+    	mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
+    	mainLayout.setOnClickListener(endMatch);
     }
     
-    //This is the dialog called when the match is finished.
+    //This is the listener called when the match is finished and the user taps the screen.
     //It releases the sound player and launches the main menu, then destroys this activity.
-    private DialogInterface.OnClickListener endMatch = new DialogInterface.OnClickListener() 
+    private View.OnClickListener endMatch = new View.OnClickListener() 
 	{
-		public void onClick(DialogInterface dialog,int id) 
+		public void onClick(View v) 
 		{
 			if (soundPlayer != null)
 			{
@@ -1398,9 +1382,7 @@ public class MastermindActivity extends Activity
 					
 				}
 			}
-			endMatchDialog.dismiss();
-			Intent intent = new Intent(MastermindActivity.this, MainMenuActivity.class);
-			startActivity(intent);
+			mainLayout.setOnClickListener(null);
 			MastermindActivity.this.finish();
 		}
 	};
