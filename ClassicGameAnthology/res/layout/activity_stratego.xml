@@ -1,0 +1,241 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    
+    tools:context="tru.kyle.classicgameanthology.StrategoActivity"
+    tools:ignore="ButtonStyle"  >
+    
+    <TextView
+        android:id="@+id/activePlayer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/gridLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="@string/display_player_turn"
+        android:textColor="#666666"
+        android:textSize="23sp" />
+
+    <TextView
+        android:id="@+id/playerTwo"
+        android:layout_width="fill_parent"
+        android:layout_height="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/playerOne"
+        android:layout_toRightOf="@+id/saveGame"
+        android:gravity="center"
+        android:text="@string/player_two"
+        android:textSize="19sp" />
+
+    <LinearLayout
+        android:id="@+id/gridLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_01_01"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_02"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_03"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_04"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_05"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_06"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_07"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_08"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_09"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_01_10"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_01_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_02_01"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_02"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_03"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_04"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_05"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_06"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_07"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_08"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_09"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_02_10"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_02_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/playerOne"
+        android:layout_width="fill_parent"
+        android:layout_height="90dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/saveGame"
+        android:layout_toLeftOf="@+id/saveGame"
+        android:gravity="center"
+        android:text="@string/player_one"
+        android:textSize="19sp" />
+
+    <Button
+        android:id="@+id/saveGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/button_border_normal_pente"
+        android:text="@string/saveGameButtonString"
+        android:textColor="#FF0000"
+        android:textSize="17sp" />
+
+</RelativeLayout>

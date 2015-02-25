@@ -19,7 +19,6 @@
     <string name="title_activity_main_game">Connect Four</string>
     <string name="title_activity_view_standings">Standings</string>
     <string name="title_activity_set_names">Names</string>
-    
     <string name="filenameNames">ConnectFour_Names</string>
     <string name="filenameStandings">ConnectFour_Standings</string>
     <string name="filenameCurrentGame">ConnectFour_CurrentGame</string>
@@ -34,7 +33,6 @@
     <string name="player_two_pieces">0</string>
     <string name="extras_box_1">CheckedView A</string>
     <string name="extras_box_2">CheckedView B</string>
-    
     <string name="currentPlayerGlobalWins">Total Wins: </string>
     <string name="currentPlayerGlobalMatches">Total Matches: </string>
     <string name="currentPlayerLocalWins">00</string>
@@ -271,5 +269,7 @@
     <string name="button_15_14" />
     <string name="button_15_15" />
     <string name="title_activity_mastermind">Mastermind</string>
+    <string name="title_activity_stratego">Stratego</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

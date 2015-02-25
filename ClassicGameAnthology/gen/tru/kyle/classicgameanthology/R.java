@@ -41,29 +41,31 @@ public final class R {
         public static final int button_border_normal_connect_four=0x7f02000a;
         public static final int button_border_normal_pente=0x7f02000b;
         public static final int button_border_normal_reversi=0x7f02000c;
-        public static final int button_border_warning_connect_four=0x7f02000d;
-        public static final int button_border_warning_pente=0x7f02000e;
-        public static final int button_marker_correct_mastermind=0x7f02000f;
-        public static final int button_marker_misplaced_mastermind=0x7f020010;
-        public static final int button_marker_unplaced_mastermind=0x7f020011;
-        public static final int button_marker_wrong_mastermind=0x7f020012;
-        public static final int button_peg_black_mastermind=0x7f020013;
-        public static final int button_peg_blue_mastermind=0x7f020014;
-        public static final int button_peg_cyan_mastermind=0x7f020015;
-        public static final int button_peg_green_mastermind=0x7f020016;
-        public static final int button_peg_magenta_mastermind=0x7f020017;
-        public static final int button_peg_orange_mastermind=0x7f020018;
-        public static final int button_peg_pink_mastermind=0x7f020019;
-        public static final int button_peg_red_mastermind=0x7f02001a;
-        public static final int button_peg_unplaced_mastermind=0x7f02001b;
-        public static final int button_peg_white_mastermind=0x7f02001c;
-        public static final int button_peg_yellow_mastermind=0x7f02001d;
-        public static final int ic_launcher=0x7f02001e;
-        public static final int main_menu_checkbox=0x7f02001f;
-        public static final int normal_background=0x7f020020;
+        public static final int button_border_normal_stratego=0x7f02000d;
+        public static final int button_border_warning_connect_four=0x7f02000e;
+        public static final int button_border_warning_pente=0x7f02000f;
+        public static final int button_marker_correct_mastermind=0x7f020010;
+        public static final int button_marker_misplaced_mastermind=0x7f020011;
+        public static final int button_marker_unplaced_mastermind=0x7f020012;
+        public static final int button_marker_wrong_mastermind=0x7f020013;
+        public static final int button_peg_black_mastermind=0x7f020014;
+        public static final int button_peg_blue_mastermind=0x7f020015;
+        public static final int button_peg_cyan_mastermind=0x7f020016;
+        public static final int button_peg_green_mastermind=0x7f020017;
+        public static final int button_peg_magenta_mastermind=0x7f020018;
+        public static final int button_peg_orange_mastermind=0x7f020019;
+        public static final int button_peg_pink_mastermind=0x7f02001a;
+        public static final int button_peg_red_mastermind=0x7f02001b;
+        public static final int button_peg_unplaced_mastermind=0x7f02001c;
+        public static final int button_peg_white_mastermind=0x7f02001d;
+        public static final int button_peg_yellow_mastermind=0x7f02001e;
+        public static final int ic_launcher=0x7f02001f;
+        public static final int main_menu_checkbox=0x7f020020;
+        public static final int normal_background=0x7f020021;
     }
     public static final class id {
-        public static final int action_menu_about=0x7f0a0168;
+        public static final int action_menu_about=0x7f0a0169;
+        public static final int action_settings=0x7f0a016a;
         public static final int activePlayer=0x7f0a000e;
         public static final int addPlayer=0x7f0a0161;
         public static final int button_01_01=0x7f0a000f;
@@ -312,6 +314,7 @@ public final class R {
         public static final int confirmGuess=0x7f0a006a;
         public static final int deletePlayer=0x7f0a0163;
         public static final int extrasLayout=0x7f0a0040;
+        public static final int gridLayout=0x7f0a0168;
         public static final int mainLayout=0x7f0a0000;
         public static final int main_menu_deleteSave=0x7f0a0047;
         public static final int main_menu_extrasCheckedView_1=0x7f0a0041;
@@ -432,12 +435,13 @@ public final class R {
         public static final int activity_pente=0x7f030003;
         public static final int activity_player_management=0x7f030004;
         public static final int activity_reversi=0x7f030005;
-        public static final int menu_spinner_dropdown_item_large=0x7f030006;
-        public static final int menu_spinner_dropdown_item_medium=0x7f030007;
-        public static final int menu_spinner_dropdown_item_small=0x7f030008;
-        public static final int menu_spinner_item_large=0x7f030009;
-        public static final int menu_spinner_item_medium=0x7f03000a;
-        public static final int menu_spinner_item_small=0x7f03000b;
+        public static final int activity_stratego=0x7f030006;
+        public static final int menu_spinner_dropdown_item_large=0x7f030007;
+        public static final int menu_spinner_dropdown_item_medium=0x7f030008;
+        public static final int menu_spinner_dropdown_item_small=0x7f030009;
+        public static final int menu_spinner_item_large=0x7f03000a;
+        public static final int menu_spinner_item_medium=0x7f03000b;
+        public static final int menu_spinner_item_small=0x7f03000c;
     }
     public static final class menu {
         public static final int connect_four=0x7f090000;
@@ -446,7 +450,8 @@ public final class R {
         public static final int pente=0x7f090003;
         public static final int player_management=0x7f090004;
         public static final int reversi=0x7f090005;
-        public static final int view_standings=0x7f090006;
+        public static final int stratego=0x7f090006;
+        public static final int view_standings=0x7f090007;
     }
     public static final class raw {
         public static final int doorbell_one=0x7f040000;
@@ -455,6 +460,7 @@ public final class R {
     }
     public static final class string {
         public static final int action_menu_about=0x7f060002;
+        public static final int action_settings=0x7f060107;
         public static final int app_name=0x7f060000;
         public static final int button_01_01=0x7f060024;
         public static final int button_01_02=0x7f060025;
@@ -715,6 +721,7 @@ public final class R {
         public static final int title_activity_player_management=0x7f060007;
         public static final int title_activity_reversi=0x7f060006;
         public static final int title_activity_set_names=0x7f060011;
+        public static final int title_activity_stratego=0x7f060106;
         public static final int title_activity_view_standings=0x7f060010;
     }
     public static final class style {
