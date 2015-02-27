@@ -259,7 +259,7 @@ public class DBManager
 			values = new ContentValues();
 			matches = DBInterface.stringToArray(cursor.getString(matchesColumn), FileSaver.Game.values().length);
 			matches[game.ordinal()] += 1;
-			if (Arrays.asList(winners).contains(cursor.getString(nameColumn)))
+			if (winners != null && Arrays.asList(winners).contains(cursor.getString(nameColumn)))
 			{
 				wins = DBInterface.stringToArray(cursor.getString(winsColumn), FileSaver.Game.values().length);
 				wins[game.ordinal()] += 1;

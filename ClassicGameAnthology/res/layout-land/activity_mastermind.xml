@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/button_07_01"
         android:layout_alignParentTop="true"
-        android:gravity="center"
+        android:gravity="top"
         android:text="@string/display_player_turn"
         android:textColor="#666666"
         android:textSize="23sp" />

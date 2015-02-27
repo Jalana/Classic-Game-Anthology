@@ -1226,7 +1226,7 @@ public class MastermindActivity extends Activity
 					{
 						if (tempSequence[countCode] == tempGuess[countGuess])
 						{
-							results[countCode] = MISPLACED_COLOR;
+							results[countGuess] = MISPLACED_COLOR;
 						}
 					}
 				}
@@ -1242,12 +1242,15 @@ public class MastermindActivity extends Activity
 	
 	private void displayGuessResults(int[] results)
 	{
-		final Button[] currentRow = buttons[remainingGuesses];
 		if (isEasyDifficulty == false)
 		{
 			results = sortGuessResults(results);
 			//If on normal difficulty, sort the results (correct first, wrong last) before displaying the results.
 			//	On easy difficulty, leave them unsorted.
+		}
+		else
+		{
+			displayCode();
 		}
 		
 		for (int count = 0; count < currentRow.length; count++)
@@ -1361,7 +1364,27 @@ public class MastermindActivity extends Activity
     	
     	mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
     	mainLayout.setOnClickListener(endMatch);
+    	for (int countVert = 0; countVert < buttons.length; countVert++)
+    	{
+    		for (int countHoriz = 0; countHoriz < buttons[countVert].length; countHoriz++)
+    		{
+    			buttons[countVert][countHoriz].setOnClickListener(button_endMatch);
+    			markers[countVert][countHoriz].setOnClickListener(button_endMatch);
+    		}
+    	}
     }
+	
+	private View.OnClickListener button_endMatch = new View.OnClickListener()
+	{
+		@Override
+		public void onClick(View v) 
+		{
+			if (endOfMatch == true)
+			{
+				endMatch.onClick(v);
+			}
+		}
+	};
     
     //This is the listener called when the match is finished and the user taps the screen.
     //It releases the sound player and launches the main menu, then destroys this activity.

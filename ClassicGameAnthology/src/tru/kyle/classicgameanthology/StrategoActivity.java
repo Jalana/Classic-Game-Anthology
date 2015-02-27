@@ -275,9 +275,9 @@ public class StrategoActivity extends Activity
 		//It then goes to onStart() and onResume().
 	}
 	
-	/*****
-	 * Other Initialization Functions
-	 *****/
+	//
+	//	Other Initialization Functions
+	//
 	
 	private void parseExtras(Intent intent)
 	{
@@ -522,9 +522,9 @@ public class StrategoActivity extends Activity
 		Toast.makeText(this, temp, Toast.LENGTH_LONG).show();
 	}
 	
-	/*****
-	 * Main Game Functions
-	 *****/
+	//
+	//	Main Game Functions
+	//
 	
 	public void swapTurn()
 	{
@@ -547,9 +547,17 @@ public class StrategoActivity extends Activity
 		activePlayerDisplay.setText(temp);
 	}
 	
-	/*****
-	 * Listeners
-	 *****/
+	//A function to check if a move would enter one of the "lakes" near the center is required.
+	//		Take the destination button as a parameter, and have a separate 2D array with 
+	//			the buttons that make up the lakes?
+	
+	//A function to hide all pieces from view, pending a canceled dialog to change turns.
+	
+	//A function that uses the player provided to hide/show pieces.
+	
+	//
+	//	Listeners
+	//
 	
 	private View.OnDragListener drag_handler = new OnDragListener()
 	{
@@ -568,23 +576,23 @@ public class StrategoActivity extends Activity
 			    }
 			    case DragEvent.ACTION_DRAG_STARTED:
 			    {
-			        /* To register your view as a potential drop zone for the current view being dragged
-			         * you need to set the event as handled
-			         */
+			        //To register your view as a potential drop zone for the current view being dragged
+			        //you need to set the event as handled
+			        //
 			        handled = true;
-			        /* An important thing to know is that drop zones need to be visible (i.e. their Visibility)
-			         * property set to something other than Gone or Invisible) in order to be considered. A nice workaround
-			         * if you need them hidden initially is to have their layout_height set to 1.
-			         */
+			        //An important thing to know is that drop zones need to be visible (i.e. their Visibility)
+			        //property set to something other than Gone or Invisible) in order to be considered. A nice workaround
+			        //if you need them hidden initially is to have their layout_height set to 1.
+			        //
 			        break;
 			    }
 			    case DragEvent.ACTION_DRAG_ENTERED:
 			    case DragEvent.ACTION_DRAG_EXITED:
 			    {
-			        /* These two states allows you to know when the dragged view is contained atop your drop zone.
-			         * Traditionally you will use that tip to display a focus ring or any other similar mechanism
-			         * to advertise your view as a drop zone to the user.
-			         */
+			        //These two states allows you to know when the dragged view is contained atop your drop zone.
+			        //Traditionally you will use that tip to display a focus ring or any other similar mechanism
+			        //to advertise your view as a drop zone to the user.
+			        //
 			    	handled = true;
 			        break;
 			    }
@@ -596,13 +604,13 @@ public class StrategoActivity extends Activity
 					{
 						;
 					}
-			        /* This state is used when the user drops the view on your drop zone. If you want to accept the drop,
-			         *  set the Handled value to true like before.
-			         */
+			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
+			        //set the Handled value to true like before.
+			        //
 			        handled = true;
-			        /* It's also probably time to get a bit of the data associated with the drag to know what
-			         * you want to do with the information.
-			         */
+			        //It's also probably time to get a bit of the data associated with the drag to know what
+			        //you want to do with the information.
+			        //
 			        int draggedColor = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
 			        rowValues[remainingGuesses][index] = draggedColor;
 			        currentRow[index].setBackground(PEG_BACKGROUNDS[draggedColor]);
@@ -611,9 +619,9 @@ public class StrategoActivity extends Activity
 			    }
 			    case DragEvent.ACTION_DRAG_ENDED:
 			    {
-			        /* This is the final state, where you still have possibility to cancel the drop happened.
-			         * You will generally want to set Handled to true.
-			         */
+			        //This is the final state, where you still have possibility to cancel the drop happened.
+			        //You will generally want to set Handled to true.
+			        //
 			        handled = true;
 			        break;
 			    }
@@ -877,3 +885,4 @@ public class StrategoActivity extends Activity
     	return BOOLEAN_EXTRAS;
     }
 }
+

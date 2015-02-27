@@ -741,6 +741,12 @@ public class ReversiActivity extends Activity
         { 
         	if (canPressButton == true)
         	{
+        		if (endOfMatch == true)
+            	{
+            		canPressButton = false;
+            		endMatch.onClick(v);
+            	}
+            	
         		canPressButton = false;
             	Button B = (Button) v;
             	boolean status = false;
@@ -839,24 +845,26 @@ public class ReversiActivity extends Activity
 	            	swapTurn();
             	}
             	
-            	new CountDownTimer(500, 300)
-            	{
-        			@Override
-        			public void onTick(long millisUntilFinished) 
-        			{
-        				
-        			}
-
-        			@Override
-        			public void onFinish() 
-        			{
-        				canPressButton = true;
-        			}
-            	}.start();
-            	
             	if (turnCount == TURN_LIMIT)
             	{
             		findWinner();
+            	}
+            	else
+            	{
+            		new CountDownTimer(500, 300)
+                	{
+            			@Override
+            			public void onTick(long millisUntilFinished) 
+            			{
+            				
+            			}
+
+            			@Override
+            			public void onFinish() 
+            			{
+            				canPressButton = true;
+            			}
+                	}.start();
             	}
         	}
         }

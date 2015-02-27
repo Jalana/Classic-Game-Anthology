@@ -7,20 +7,20 @@ import android.content.DialogInterface;
 public class ActionMenu 
 {
 	private static AlertDialog aboutDialog;
-	private static final String ABOUT_TITLE = "";
+	private static final String ABOUT_TITLE = "About";
 	private static final String ABOUT_MESSAGE = 
-			"Classic Game Anthology" +
-			"\nCopyright (C) Connor Kyle (2015)" +
+			"Classic Game Anthology " +
+			"\nCopyright (C) Connor Kyle (2015) " +
 
-			"\n\nThe Classic Game Anthology is free software: you can redistribute it and/or modify" +
-			"it under the terms of the GNU General Public License as published by" +
-			"the Free Software Foundation, either version 3 of the License, or" +
+			"\n\nThe Classic Game Anthology is free software: you can redistribute it and/or modify " +
+			"it under the terms of the GNU General Public License as published by " +
+			"the Free Software Foundation, either version 3 of the License, or " +
 			"(at your option) any later version." +
 
-			"\n\nTo read the full text of the GNU General Public License, see:" +
+			"\n\nTo read the full text of the GNU General Public License, see: " +
 			"\n http://www.gnu.org/licenses/gpl.html" +
 			
-			"\n\nIf you wish to access the source code, send an e-mail to:" +
+			"\n\nIf you wish to access the source code, send an e-mail to: " +
 			"\n connorkyle81@gmail.com"
 			;
 	

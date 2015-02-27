@@ -664,7 +664,13 @@ public class ConnectFourActivity extends Activity
     private OnClickListener grid_handler = new OnClickListener() 
     { 
         public void onClick(View v) 
-        { 
+        {
+        	if (endOfMatch == true)
+        	{
+        		canPressButton = false;
+        		endMatch.onClick(v);
+        	}
+        	
         	if (canPressButton == true)
         	{
         		canPressButton = false;
@@ -729,20 +735,6 @@ public class ConnectFourActivity extends Activity
             	soundPlayer.start();
             	
             	swapTurn();
-            	new CountDownTimer(500, 300)
-            	{
-        			@Override
-        			public void onTick(long millisUntilFinished) 
-        			{
-        				
-        			}
-
-        			@Override
-        			public void onFinish() 
-        			{
-        				canPressButton = true;
-        			}
-            	}.start();
             	
             	if (result == true)
             	{
@@ -751,6 +743,23 @@ public class ConnectFourActivity extends Activity
             	else if (turnCount == TURN_LIMIT)
             	{
             		displayTie();
+            	}
+            	else
+            	{
+            		new CountDownTimer(500, 300)
+                	{
+            			@Override
+            			public void onTick(long millisUntilFinished) 
+            			{
+            				
+            			}
+
+            			@Override
+            			public void onFinish() 
+            			{
+            				canPressButton = true;
+            			}
+                	}.start();
             	}
         	}
         }
