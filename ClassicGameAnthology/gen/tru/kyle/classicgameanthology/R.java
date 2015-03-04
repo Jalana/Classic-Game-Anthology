@@ -64,8 +64,8 @@ public final class R {
         public static final int normal_background=0x7f020021;
     }
     public static final class id {
-        public static final int action_menu_about=0x7f0a0169;
-        public static final int action_settings=0x7f0a016a;
+        public static final int action_menu_about=0x7f0a0185;
+        public static final int action_settings=0x7f0a0186;
         public static final int activePlayer=0x7f0a000e;
         public static final int addPlayer=0x7f0a0161;
         public static final int button_01_01=0x7f0a000f;
@@ -409,6 +409,34 @@ public final class R {
         public static final int pente_playerOneCaptures=0x7f0a0156;
         public static final int pente_playerTwoCaptureHint=0x7f0a0155;
         public static final int pente_playerTwoCaptures=0x7f0a00cb;
+        public static final int placementButtonsLayout=0x7f0a016a;
+        public static final int placementHintView=0x7f0a0178;
+        public static final int placementHintsLayout=0x7f0a0169;
+        public static final int placementPiecesView=0x7f0a016b;
+        public static final int placement_button_00=0x7f0a016c;
+        public static final int placement_button_01=0x7f0a016d;
+        public static final int placement_button_02=0x7f0a016e;
+        public static final int placement_button_03=0x7f0a016f;
+        public static final int placement_button_04=0x7f0a0170;
+        public static final int placement_button_05=0x7f0a0171;
+        public static final int placement_button_06=0x7f0a0172;
+        public static final int placement_button_07=0x7f0a0173;
+        public static final int placement_button_08=0x7f0a0174;
+        public static final int placement_button_09=0x7f0a0175;
+        public static final int placement_button_10=0x7f0a0176;
+        public static final int placement_button_11=0x7f0a0177;
+        public static final int placement_hint_00=0x7f0a0179;
+        public static final int placement_hint_01=0x7f0a017a;
+        public static final int placement_hint_02=0x7f0a017b;
+        public static final int placement_hint_03=0x7f0a017c;
+        public static final int placement_hint_04=0x7f0a017d;
+        public static final int placement_hint_05=0x7f0a017e;
+        public static final int placement_hint_06=0x7f0a017f;
+        public static final int placement_hint_07=0x7f0a0180;
+        public static final int placement_hint_08=0x7f0a0181;
+        public static final int placement_hint_09=0x7f0a0182;
+        public static final int placement_hint_10=0x7f0a0183;
+        public static final int placement_hint_11=0x7f0a0184;
         public static final int playerLayout=0x7f0a0049;
         public static final int playerOne=0x7f0a000a;
         public static final int playerSpinner=0x7f0a0159;
@@ -460,7 +488,7 @@ public final class R {
     }
     public static final class string {
         public static final int action_menu_about=0x7f060002;
-        public static final int action_settings=0x7f060107;
+        public static final int action_settings=0x7f06011f;
         public static final int app_name=0x7f060000;
         public static final int button_01_01=0x7f060024;
         public static final int button_01_02=0x7f060025;
@@ -703,6 +731,30 @@ public final class R {
         public static final int name_player1=0x7f060008;
         public static final int name_player2=0x7f060009;
         public static final int pente_captures_hint=0x7f060018;
+        public static final int placement_bomb=0x7f060105;
+        public static final int placement_captain=0x7f06010a;
+        public static final int placement_colonel=0x7f060108;
+        public static final int placement_flag=0x7f060110;
+        public static final int placement_general=0x7f060107;
+        public static final int placement_hint_bomb=0x7f060111;
+        public static final int placement_hint_captain=0x7f060116;
+        public static final int placement_hint_colonel=0x7f060114;
+        public static final int placement_hint_flag=0x7f06011c;
+        public static final int placement_hint_general=0x7f060113;
+        public static final int placement_hint_lieutenant=0x7f060117;
+        public static final int placement_hint_major=0x7f060115;
+        public static final int placement_hint_marshall=0x7f060112;
+        public static final int placement_hint_miner=0x7f060119;
+        public static final int placement_hint_scout=0x7f06011a;
+        public static final int placement_hint_sergeant=0x7f060118;
+        public static final int placement_hint_spy=0x7f06011b;
+        public static final int placement_lieutenant=0x7f06010b;
+        public static final int placement_major=0x7f060109;
+        public static final int placement_marshall=0x7f060106;
+        public static final int placement_miner=0x7f06010d;
+        public static final int placement_scout=0x7f06010e;
+        public static final int placement_sergeant=0x7f06010c;
+        public static final int placement_spy=0x7f06010f;
         public static final int player_one=0x7f06000b;
         public static final int player_one_captures=0x7f060019;
         public static final int player_one_pieces=0x7f06001c;
@@ -716,12 +768,12 @@ public final class R {
         public static final int title_activity_connect_four=0x7f060004;
         public static final int title_activity_main_game=0x7f06000f;
         public static final int title_activity_main_menu=0x7f060003;
-        public static final int title_activity_mastermind=0x7f060105;
+        public static final int title_activity_mastermind=0x7f06011d;
         public static final int title_activity_pente=0x7f060005;
         public static final int title_activity_player_management=0x7f060007;
         public static final int title_activity_reversi=0x7f060006;
         public static final int title_activity_set_names=0x7f060011;
-        public static final int title_activity_stratego=0x7f060106;
+        public static final int title_activity_stratego=0x7f06011e;
         public static final int title_activity_view_standings=0x7f060010;
     }
     public static final class style {

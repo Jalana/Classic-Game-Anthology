@@ -49,80 +49,80 @@
 
             <Button
                 android:id="@+id/button_01_01"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_01"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_02"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_02"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_03"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_03"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_04"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_04"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_05"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_05"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_06"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_06"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_07"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_07"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_08"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_08"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_09"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_09"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_01_10"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_01_10"
                 android:textSize="15sp" />
@@ -134,87 +134,992 @@
 
             <Button
                 android:id="@+id/button_02_01"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_01"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_02"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_02"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_03"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_03"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_04"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_04"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_05"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_05"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_06"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_06"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_07"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_07"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_08"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_08"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_09"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_09"
                 android:textSize="15sp" />
 
             <Button
                 android:id="@+id/button_02_10"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/button_02_10"
                 android:textSize="15sp" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_03_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_03_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_03_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_04_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_04_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_04_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_05_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_05_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_05_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_06_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_06_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_06_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_07_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_07_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_07_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_08_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_08_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_08_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_09_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_09_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_09_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_10_01"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_01"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_02"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_02"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_03"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_03"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_04"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_04"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_05"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_05"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_06"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_06"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_07"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_07"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_08"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_08"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_09"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_09"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_10_10"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/button_10_10"
+                android:textSize="15sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/placementHintsLayout"
+            android:layout_centerVertical="true"
+            android:id="@+id/placementButtonsLayout" >
+
+        <TextView
+            android:id="@+id/placementPiecesView"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:text="Pieces:"
+            android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_00"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_bomb"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_01"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_marshall"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_02"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_general"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_03"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_colonel"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_04"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_major"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_05"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_captain"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_06"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_lieutenant"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_07"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_sergeant"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_08"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_miner"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_button_09"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_scout"
+                android:textSize="17sp" />
+            
+            <Button
+                android:id="@+id/placement_button_10"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_spy"
+                android:textSize="17sp" />
+            
+            <Button
+                android:id="@+id/placement_button_11"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_flag"
+                android:textSize="17sp" />
+    </LinearLayout>
+    
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_above="@+id/saveGame"
+            android:layout_centerVertical="true"
+            android:id="@+id/placementHintsLayout" >
+			
+        	<TextView
+	            android:id="@+id/placementHintView"
+	            android:layout_width="wrap_content"
+	            android:layout_height="fill_parent"
+	            android:layout_weight="1"
+	            android:text="Remaining:"
+	            android:textSize="17sp" />
+        	
+            <Button
+                android:id="@+id/placement_hint_00"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_bomb"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_01"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_marshall"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_02"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_general"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_03"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_colonel"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_04"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_major"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_05"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_captain"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_06"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_lieutenant"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_07"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_sergeant"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_08"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_miner"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/placement_hint_09"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_scout"
+                android:textSize="17sp" />
+            
+            <Button
+                android:id="@+id/placement_hint_10"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_spy"
+                android:textSize="17sp" />
+            
+            <Button
+                android:id="@+id/placement_hint_11"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/button_border_normal_stratego"
+                android:text="@string/placement_hint_flag"
+                android:textSize="17sp" />
+    </LinearLayout>
+    
     <TextView
         android:id="@+id/playerOne"
         android:layout_width="fill_parent"

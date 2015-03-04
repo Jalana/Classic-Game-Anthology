@@ -43,6 +43,7 @@ import android.widget.Toast;
  * practical.
  */
 
+
 public class StrategoActivity extends Activity 
 {
 	protected static final String[][] EXTRAS = null;
@@ -58,17 +59,28 @@ public class StrategoActivity extends Activity
 	public static final Integer[] PLAYERS = {2};
 	public final Game THIS_GAME = Game.Stratego;
 	public final GameByLayout THIS_LAYOUT = GameByLayout.stratego;
-	private final String BUTTON_BACK_NORMAL_STRING = "button_border_normal_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_GLOW_STRING = "button_border_glowing_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_WARNING_STRING = "button_border_warning_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_EMPTY_STRING = "button_space_empty_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_RED_STRING = "button_space_red_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_BLUE_STRING = "button_border_blue_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_EMPTY_STRING = "button_space_movable_empty_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_RED_STRING = "button_space_movable_red_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_BLUE_STRING = "button_border_movable_blue_" + THIS_LAYOUT.toString();
 	
-	public static final int VERTICAL_LIMIT = 7;
-	public static final int HORIZONTAL_LIMIT = 7;
+	public static final int VERTICAL_LIMIT = 10;
+	public static final int HORIZONTAL_LIMIT = 10;
 	public static final int TURN_LIMIT = VERTICAL_LIMIT * HORIZONTAL_LIMIT;
-	public static final int SEQUENCE_TO_WIN = 4;
+	static final int INVALID = Integer.MIN_VALUE;
+	static final int VALID = Integer.MAX_VALUE;
+	
 	final char PLAYER_ONE_MARK = 'X';
 	final char PLAYER_TWO_MARK = 'O';
+	final char UNKNOWN_MARK = '?';
 	final char BLANK_MARK = ' ';
+	
+	//This String is used to hold an integer corresponding to a piece's ordinal value.
+	private static final String PIECE_RANK_INDEX_KEY = "piece_index";
+	private static final String X_COORDINATE_KEY = "x_location";
+	private static final String Y_COORDINATE_KEY = "y_location";
 	
 	boolean gameInProgress = false;
 	boolean gameEnded = false;
@@ -96,11 +108,46 @@ public class StrategoActivity extends Activity
 	int playerOneColour = Color.RED;
 	int playerTwoColour = Color.BLUE;
 	
+	Button[] placementButtons = new Button[StrategoPiece.RankValues.values().length];
+	Button[] hintButtons = new Button[StrategoPiece.RankValues.values().length];
+	
 	int[][] pointsPlaced = new int[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
-	Button[][] buttons = new Button[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
+	StrategoPiece[][] gridPieces = new StrategoPiece[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
+	Button[][] gridButtons = new Button[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
+	private StrategoPiece currentAttacker = null;
+	Button[] availableLocationButtons;
+	Drawable[] availableLocationOldBackgrounds;
+	//This checks for invalid locations, since the standard Stratego board has two lakes near the center
+	//	that are unusable for movement.
+	//If an option is ever added to allow variable grid sizes, multiple variations of this array
+	//	may be required.
+	private static final int[][] MOVEMENT_GRID_CHECK = {
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, INVALID, INVALID, VALID, VALID, INVALID, INVALID, VALID, VALID},
+			{VALID, VALID, INVALID, INVALID, VALID, VALID, INVALID, INVALID, VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
+			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID}
+	};
+	private static final int[] PIECE_LIMITS = {
+		6, 	//Bombs
+		1, 	//Marshalls
+		1, 	//Generals
+		2, 	//etc.
+		3, 
+		4, 
+		4, 
+		4, 
+		5, 	//Miners
+		8, 	//Scouts
+		1, 	//Spies
+		1	//Flags
+	};
 	String filenameGame;
-	String filenameStandings;
-	String filenameNames;
 	
 	AlertDialog endMatchDialog;
 	AlertDialog saveDialog;
@@ -112,14 +159,19 @@ public class StrategoActivity extends Activity
 	boolean newMatch;
 	boolean endOfMatch = false;
 	boolean highlightMoves = true;
+	boolean keepReveals = true;
 	MyQueue<Button> lastLines = new MyQueue<Button>();
 	MyQueue<Button> tempLines = new MyQueue<Button>();
 	
-	private Drawable BUTTON_BACK_NORMAL;
-	private Drawable BUTTON_BACK_GLOW;
-	private Drawable BUTTON_BACK_WARNING;
+	private Drawable BUTTON_BACK_EMPTY;
+	private Drawable BUTTON_BACK_RED;
+	private Drawable BUTTON_BACK_BLUE;
+	private Drawable BUTTON_BACK_MOVABLE_EMPTY;
+	private Drawable BUTTON_BACK_MOVABLE_RED;
+	private Drawable BUTTON_BACK_MOVABLE_BLUE;
 	
 	protected int buttonSize;
+	MyQueue<Button> tempMoves = new MyQueue<Button>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -128,9 +180,12 @@ public class StrategoActivity extends Activity
 		setContentView(R.layout.activity_stratego);
 		
 		Resources res = getResources();
-        BUTTON_BACK_NORMAL = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_NORMAL_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_GLOW = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_GLOW_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_WARNING = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_WARNING_STRING, "drawable", getPackageName()));
+        BUTTON_BACK_EMPTY = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_EMPTY_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_RED = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_RED_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_BLUE = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_BLUE_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_MOVABLE_EMPTY = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_EMPTY_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_MOVABLE_RED = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_RED_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_MOVABLE_BLUE = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_BLUE_STRING, "drawable", getPackageName()));
     	
     	Intent intent = getIntent();
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
@@ -138,8 +193,6 @@ public class StrategoActivity extends Activity
         {
         	filenameGame = FileSaver.AUTOSAVE_NAME;
         }
-    	filenameStandings = getString(R.string.filenameStandings);
-    	filenameNames = getString(R.string.filenameNames);
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	
@@ -201,14 +254,14 @@ public class StrategoActivity extends Activity
 		buttonSize = getButtonDimensions();
     	Log.d("Stratego Scaling", "buttonSize = " + buttonSize);
     	LayoutParams params;
-		for (int count = 0; count < buttons.length; count++)
+		for (int count = 0; count < gridButtons.length; count++)
 		{
-			for (int count2 = 0; count2 < buttons[count].length; count2++)
+			for (int count2 = 0; count2 < gridButtons[count].length; count2++)
 			{
-				params = buttons[count][count2].getLayoutParams();
+				params = gridButtons[count][count2].getLayoutParams();
 				params.height = buttonSize;
 				params.width = buttonSize;
-				buttons[count][count2].setLayoutParams(params);
+				gridButtons[count][count2].setLayoutParams(params);
 			}
 		}
 		
@@ -293,9 +346,9 @@ public class StrategoActivity extends Activity
 	{
 		String currentID;
         int resID;
-        for (int count = 0; count < buttons.length; count++)
+        for (int count = 0; count < gridButtons.length; count++)
         {
-        	for (int count2 = 0; count2 < buttons[count].length; count2++)
+        	for (int count2 = 0; count2 < gridButtons[count].length; count2++)
         	{
         		currentID = "button_";
         		if ((count + 1) < 10)
@@ -309,13 +362,38 @@ public class StrategoActivity extends Activity
         		}
         		currentID += (count2 + 1);
         		resID = res.getIdentifier(currentID, "id", getPackageName());
-        		buttons[count][count2] = (Button)findViewById(resID);
-        		buttons[count][count2].setOnClickListener(grid_handler);
+        		gridButtons[count][count2] = (Button)findViewById(resID);
+        		gridButtons[count][count2].setOnClickListener(grid_handler);
         		if (gameInProgress == false)
         		{
-        			buttons[count][count2].setText(BLANK_MARK + "");
+        			gridButtons[count][count2].setText(BLANK_MARK + "");
         		}
         	}
+        }
+        
+        for (int count = 0; count < placementButtons.length; count++)
+        {
+    		currentID = "placement_button_";
+    		if ((count + 1) < 10)
+    		{
+    			currentID += '0';
+    		}
+    		currentID += (count);
+    		resID = res.getIdentifier(currentID, "id", getPackageName());
+    		placementButtons[count] = (Button)findViewById(resID);
+    		placementButtons[count].setOnDragListener(grid_handler);
+        }
+        
+        for (int count = 0; count < hintButtons.length; count++)
+        {
+    		currentID = "placement_hint_";
+    		if ((count + 1) < 10)
+    		{
+    			currentID += '0';
+    		}
+    		currentID += (count);
+    		resID = res.getIdentifier(currentID, "id", getPackageName());
+    		hintButtons[count] = (Button)findViewById(resID);
         }
 	}
 	
@@ -323,25 +401,25 @@ public class StrategoActivity extends Activity
 	{
 		int countVert;
 		int countHoriz;
-        for (countVert = 0; countVert < buttons.length; countVert++)
+        for (countVert = 0; countVert < gridButtons.length; countVert++)
         {
-        	for (countHoriz = 0; countHoriz < buttons[countVert].length; countHoriz++)
+        	for (countHoriz = 0; countHoriz < gridButtons[countVert].length; countHoriz++)
         	{
         		switch (pointsPlaced[countVert][countHoriz])
         		{
 	        		case 1:
 	        		{
-	        			addMark(pointsPlaced[countVert][countHoriz], buttons[countVert][countHoriz]);
+	        			addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
 	        			break;
 	        		}
 	        		case 2:
 	        		{
-	        			addMark(pointsPlaced[countVert][countHoriz], buttons[countVert][countHoriz]);
+	        			addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
 	        			break;
 	        		}
 	        		default:
 	        		{
-	        			buttons[countVert][countHoriz].setText(BLANK_MARK + "");
+	        			gridButtons[countVert][countHoriz].setText(BLANK_MARK + "");
 	        			break;
 	        		}
         		}
@@ -367,18 +445,18 @@ public class StrategoActivity extends Activity
 		
 		pointsPlaced = DBInterface.stringToGrid(vertLimit, horizLimit, 
 				values.getAsString(DBInterface.GRID_VALUES_KEY));
-		for (int countVert = 0; countVert < buttons.length; countVert++)
+		for (int countVert = 0; countVert < gridButtons.length; countVert++)
 		{
-			for (int countHoriz = 0; countHoriz < buttons[countVert].length; countHoriz++)
+			for (int countHoriz = 0; countHoriz < gridButtons[countVert].length; countHoriz++)
 			{
 				if (pointsPlaced[countVert][countHoriz] != 0)
 				{
-					buttons[countVert][countHoriz].setClickable(false);
-					addMark(pointsPlaced[countVert][countHoriz], buttons[countVert][countHoriz]);
+					gridButtons[countVert][countHoriz].setClickable(false);
+					addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
 				}
 				else
 				{
-					buttons[countVert][countHoriz].setClickable(true);
+					gridButtons[countVert][countHoriz].setClickable(true);
 				}
 			}
 		}
@@ -418,7 +496,7 @@ public class StrategoActivity extends Activity
 		return DBInterface.insertSave(getApplicationContext(), values, THIS_GAME, overwrite);
 	}
 	
-	//This function calculates the maximum dimensions allowable for the buttons, and returns the result.
+	//This function calculates the maximum dimensions allowable for the gridButtons, and returns the result.
 	//		Note that the final result is in raw pixels, not density-independent pixels.
 	private int getButtonDimensions()
 	{
@@ -473,13 +551,13 @@ public class StrategoActivity extends Activity
 		}
 		
 		int divisor = 1;
-		if (buttons.length < buttons[0].length)
+		if (gridButtons.length < gridButtons[0].length)
     	{
-    		divisor = buttons[0].length;
+    		divisor = gridButtons[0].length;
     	}
     	else
     	{
-    		divisor = buttons.length;
+    		divisor = gridButtons.length;
     	}
 		result = result / divisor;
 		
@@ -489,12 +567,12 @@ public class StrategoActivity extends Activity
 	//This function sets game data to its default state.
 	public void resetData()
 	{
-		for (int count = 0; count < buttons.length; count++)
+		for (int count = 0; count < gridButtons.length; count++)
 		{
-			for (int count2 = 0; count2 < buttons[count].length; count2++)
+			for (int count2 = 0; count2 < gridButtons[count].length; count2++)
 			{
-				buttons[count][count2].setClickable(true);
-				//buttons[count][count2].setBackgroundColor(Color.WHITE);
+				gridButtons[count][count2].setClickable(true);
+				//gridButtons[count][count2].setBackgroundColor(Color.WHITE);
 			}
 		}
 		for (int count = 0; count < pointsPlaced.length; count++)
@@ -549,11 +627,117 @@ public class StrategoActivity extends Activity
 	
 	//A function to check if a move would enter one of the "lakes" near the center is required.
 	//		Take the destination button as a parameter, and have a separate 2D array with 
-	//			the buttons that make up the lakes?
+	//			the gridButtons that make up the lakes?
 	
 	//A function to hide all pieces from view, pending a canceled dialog to change turns.
+	public void hideAllPieces(final int player)
+	{
+		for (int countVert = 0; countVert < VERTICAL_LIMIT; countVert++)
+		{
+			for (int countHoriz = 0; countHoriz < HORIZONTAL_LIMIT; countHoriz++)
+			{
+				if (gridPieces[countVert][countHoriz] == null)
+				{
+					gridButtons[countVert][countHoriz].setText(BLANK_MARK + "");
+				}
+				else
+				{
+					gridButtons[countVert][countHoriz].setText(UNKNOWN_MARK + "");
+				}
+			}
+		}
+	}
 	
 	//A function that uses the player provided to hide/show pieces.
+	public void showPlayerPieces(final int player)
+	{
+		StrategoPiece currentPiece;
+		for (int countVert = 0; countVert < VERTICAL_LIMIT; countVert++)
+		{
+			for (int countHoriz = 0; countHoriz < HORIZONTAL_LIMIT; countHoriz++)
+			{
+				currentPiece = gridPieces[countVert][countHoriz];
+				if (currentPiece != null)
+				{
+					if (currentPiece.getOwner() == player
+							|| (currentPiece.isExposed() == true && keepReveals == true))
+					{
+						gridButtons[countVert][countHoriz].setText(currentPiece.getRankAsString());
+					}
+				}
+			}
+		}
+	}
+	
+	//A function to calculate the potential locations for movement.
+	//		Set an array of Buttons to be highlighted as potential movement points.
+	//		availableLocationButtons is a class-level variable set here.
+	//	Also make sure to register drag_handler for these buttons.
+	//	Also check for the lakes; no unit can move into or through those.
+	private void findPotentialMoves(Button b, StrategoPiece piece, final int xLoc, final int yLoc)
+	{
+		int range = piece.getMovementRange();
+		scanMovementLine(xLoc, yLoc, range, 1, 0);
+		scanMovementLine(xLoc, yLoc, range, 0, 1);
+		scanMovementLine(xLoc, yLoc, range, -1, 0);
+		scanMovementLine(xLoc, yLoc, range, 0, -1);
+		availableLocationButtons = new Button[tempMoves.size()];
+		for (int count = 0; count < availableLocationButtons.length; count++)
+		{
+			availableLocationButtons[count] = tempMoves.dequeue();
+			availableLocationButtons[count].setOnDragListener(drag_handler);
+		}
+		tempMoves.clear();
+	}
+	
+	private void scanMovementLine(final int xLoc, final int yLoc, final int range, final int xDir, final int yDir)
+	{
+		int vertCount = 0;
+		int horizCount = 0;
+		for (int vertIndex = xLoc; vertCount < range && vertIndex >= 0 && vertIndex < VERTICAL_LIMIT; 
+				vertIndex += xDir, vertCount++)
+		{
+			for (int horizIndex = yLoc; horizCount < range && horizIndex >= 0 && horizIndex < HORIZONTAL_LIMIT; 
+					horizIndex += yDir, horizCount++)
+			{
+				if (MOVEMENT_GRID_CHECK[vertIndex][horizIndex] != INVALID)
+				{
+					tempMoves.enqueue(gridButtons[vertIndex][horizIndex]);
+				}
+			}
+		}
+	}
+	
+	private void highlightPotentialMoves()
+	{
+		availableLocationOldBackgrounds = new Drawable[availableLocationButtons.length];
+		for (int count = 0; count < availableLocationButtons.length; count++)
+		{
+			availableLocationOldBackgrounds[count] = availableLocationButtons[count].getBackground();
+			if (availableLocationOldBackgrounds[count] == BUTTON_BACK_RED)
+			{
+				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_RED);
+			}
+			else if (availableLocationOldBackgrounds[count] == BUTTON_BACK_BLUE)
+			{
+				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_BLUE);
+			}
+			else
+			{
+				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_EMPTY);
+			}
+		}
+	}
+	
+	private void clearPotentialMoves()
+	{
+		for (int count = 0; count < availableLocationButtons.length; count++)
+		{
+			availableLocationButtons[count].setBackground(availableLocationOldBackgrounds[count]);
+			availableLocationButtons[count].setOnDragListener(null);
+		}
+		availableLocationButtons = null;
+	}
 	
 	//
 	//	Listeners
@@ -599,10 +783,42 @@ public class StrategoActivity extends Activity
 			    case DragEvent.ACTION_DROP:
 			    {
 			    	Button b = (Button) v;
-			    	int index;
-			    	for (index = 0; index < currentRow.length && currentRow[index] != b; index++)
+					
+					StrategoPiece defendingPiece;
+					int vertIndex;
+					int horizIndex;
+					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 					{
-						;
+						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+						{
+							if (gridButtons[vertIndex][horizIndex] == b)
+							{
+								defendingPiece = gridPieces[vertIndex][horizIndex];
+								break;
+							}
+						}
+						if (gridButtons[vertIndex][horizIndex] == b)
+						{
+							break;
+						}
+					}
+					
+					if (defendingPiece != null)
+					{
+						defendingPiece.updateCoordinates(vertIndex, horizIndex);
+						StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
+						gridPieces[vertIndex][horizIndex] = victor;
+						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						if (victor == currentAttacker)
+						{
+							currentAttacker.updateCoordinates(vertIndex, horizIndex);
+						}
+					}
+					else
+					{
+						gridPieces[vertIndex][horizIndex] = currentAttacker;
+						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						currentAttacker.updateCoordinates(vertIndex, horizIndex);
 					}
 			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
 			        //set the Handled value to true like before.
@@ -611,10 +827,7 @@ public class StrategoActivity extends Activity
 			        //It's also probably time to get a bit of the data associated with the drag to know what
 			        //you want to do with the information.
 			        //
-			        int draggedColor = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
-			        rowValues[remainingGuesses][index] = draggedColor;
-			        currentRow[index].setBackground(PEG_BACKGROUNDS[draggedColor]);
-			        //Log.d("Mastermind", rowValues[remainingGuesses][index] + "");
+			        clearPotentialMoves();
 			        break;
 			    }
 			    case DragEvent.ACTION_DRAG_ENDED:
@@ -630,6 +843,11 @@ public class StrategoActivity extends Activity
 		}
 	};
 	
+	//Placement drag handlers are needed.
+	//	They must account for pieces being replaced (second-guessing one's choices, bad placements, etc.),
+	//		so when a drop is made the current value there must be considered (INVALID can be used for a null)
+	//		and used to restock the array holding however many pieces the player can still place.
+	
 	//This warning must be ignored, as following its suggestion causes the onTouch() function
 	//		to trigger the button's onClick() event, which leads to an infinite loop.
 	@SuppressLint("ClickableViewAccessibility") 
@@ -640,25 +858,45 @@ public class StrategoActivity extends Activity
 		{
 			Button b = (Button) v;
 			
-			//Calculate the button's location, determine the piece currently there,
-	        //		and use those parameters to calculate available movement points.
-			//Register the onDragHandler for the appropriate buttons based on those results.
-			//	For movement: 
-			//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
-			//		-Bombs and the Flag cannot move at all.
-			//		-All other pieces move a single square vertically or horizontally.
-			//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
-			
-			//b.performClick();
-			int index = 0;
-			for (index = 0; index < colorButtons.length && colorButtons[index] != b; index++)
+			StrategoPiece selectedPiece;
+			int vertIndex;
+			int horizIndex;
+			for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 			{
-				;
+				for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+				{
+					if (gridButtons[vertIndex][horizIndex] == b)
+					{
+						selectedPiece = gridPieces[vertIndex][horizIndex];
+						break;
+					}
+				}
+				if (gridButtons[vertIndex][horizIndex] == b)
+				{
+					break;
+				}
 			}
-			ClipData data = ClipData.newPlainText(COLOR_DRAG_KEY, (index + ""));
-			if (event.getAction() == MotionEvent.ACTION_DOWN)
+			
+			if (selectedPiece != null && event.getAction() == MotionEvent.ACTION_DOWN)
 			{
-				b.startDrag(data, new View.DragShadowBuilder(b), null, 0);
+				selectedPiece.updateCoordinates(vertIndex, horizIndex);
+				int range = selectedPiece.getMovementRange();
+				if (range > 0)
+				{
+					currentAttacker = selectedPiece;
+					findPotentialMoves(b, selectedPiece, vertIndex, horizIndex);
+					highlightPotentialMoves();
+					//Calculate the button's location, determine the piece currently there,
+			        //		and use those parameters to calculate available movement points.
+					//Register the onDragHandler for the appropriate gridButtons based on those results.
+					//	For movement: 
+					//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
+					//		-Bombs and the Flag cannot move at all.
+					//		-All other pieces move a single square vertically or horizontally.
+					//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
+					
+					b.startDrag(null, new View.DragShadowBuilder(b), null, 0);
+				}
 			}
 			return false;
 		}
@@ -885,4 +1123,5 @@ public class StrategoActivity extends Activity
     	return BOOLEAN_EXTRAS;
     }
 }
+
 

@@ -1227,6 +1227,7 @@ public class MastermindActivity extends Activity
 						if (tempSequence[countCode] == tempGuess[countGuess])
 						{
 							results[countGuess] = MISPLACED_COLOR;
+							tempSequence[countCode] = CANCELED_CODE;
 						}
 					}
 				}

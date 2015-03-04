@@ -26,15 +26,67 @@ public class StrategoPiece
 	};
 	
 	private RankValues rank;
+	private boolean exposed;
+	private int owner;
+	private int location_x;
+	private int location_y;
 	
-	public StrategoPiece(RankValues newRank)
+	public StrategoPiece(RankValues newRank, int newOwner, int x, int y)
 	{
+		exposed = false;
 		rank = newRank;
+		owner = newOwner;
+		location_x = x;
+		location_y = y;
 	}
 	
 	public RankValues getRank()
 	{
 		return rank;
+	}
+	
+	public int getOwner()
+	{
+		return owner;
+	}
+	
+	/*****
+	 * Retrieves the x-coordinate of the piece.
+	 * @return an int representing the piece's current x-coordinate.
+	 *****/
+	public int getLocationX()
+	{
+		return location_x;
+	}
+	
+	/*****
+	 * Retrieves the y-coordinate of the piece.
+	 * @return an int representing the piece's current y-coordinate.
+	 *****/
+	public int getLocationY()
+	{
+		return location_y;
+	}
+	
+	public boolean isExposed()
+	{
+		return exposed;
+	}
+	
+	public void revealPiece()
+	{
+		exposed = false;
+	}
+	
+	public void hidePiece()
+	{
+		exposed = true;
+	}
+	
+	public void updateCoordinates(int x, int y)
+	{
+		location_x = x;
+		location_y = y;
 	}
 	
 	/****
@@ -98,7 +150,7 @@ public class StrategoPiece
 	 * @param defender : the piece under attack.
 	 * @return the victorious piece, or null if a tie occurred.
 	 */
-	public StrategoPiece evaluateCombat(StrategoPiece attacker, StrategoPiece defender)
+	public static StrategoPiece evaluateCombat(StrategoPiece attacker, StrategoPiece defender)
 	{
 		int offense = attacker.getRank().ordinal();
 		int defense = defender.getRank().ordinal();
@@ -113,6 +165,7 @@ public class StrategoPiece
 		{
 			//Miner attacking Bomb results in a win for the Miner, even though the Bomb wins
 			//		over any other unit.
+			//Coding a case for the reverse scenario is unnecessary, since Bombs cannot be attackers.
 			return attacker;
 		}
 		else if (offense == defense)

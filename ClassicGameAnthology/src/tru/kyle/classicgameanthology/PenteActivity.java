@@ -920,6 +920,8 @@ public class PenteActivity extends Activity
             	}
             	soundPlayer.start();
             	
+            	swapTurn();
+            	
             	if (captures[presentTurn - 1] >= 5)
             	{
             		result = true;
