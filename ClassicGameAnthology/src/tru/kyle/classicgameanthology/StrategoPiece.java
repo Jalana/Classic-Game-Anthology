@@ -1,8 +1,15 @@
 package tru.kyle.classicgameanthology;
 
+import tru.kyle.databases.DBInterface;
+
 public class StrategoPiece 
 {
 	private static final String LOGTAG = "StrategoPiece";
+	
+	/*
+	final static int CLASSIC_KEY = 1;
+	final static int FANTASY_KEY = 2;
+	*/
 	
 	//Note that the rank order is very specific.
 	//As encoded, match-ups can be compared using ordinals.
@@ -22,7 +29,46 @@ public class StrategoPiece
 		Miner,
 		Scout,
 		Spy,
-		Flag
+		Flag;
+		/*
+		public String toString(int key)
+		{
+			if (key == StrategoPiece.CLASSIC_KEY)
+			{
+				return toString();
+			}
+			if (key == StrategoPiece.FANTASY_KEY)
+			{
+				switch (this)
+				{
+				case Bomb:
+					return "Trap";
+				case Marshall:
+					return "Dragon";
+				case General:
+					return "Wizard";
+				case Colonel:
+					return "";
+				case Major:
+					return "";
+				case Captain:
+					return "";
+				case Lieutenant:
+					return "";
+				case Sergeant:
+					return "";
+				case Miner:
+					return "";
+				case Scout:
+					return "";
+				case Spy:
+					return "Dragonslayer";
+				case Flag:
+					return "Flag";
+				}
+			}
+		}
+		*/
 	};
 	
 	private RankValues rank;
@@ -40,6 +86,30 @@ public class StrategoPiece
 		location_y = y;
 	}
 	
+	/****
+	 * This constructor parses the provided String into the various fields.
+	 * This constructor should only be used to recreate a piece from a database or file, 
+	 * as improperly formatted Strings will lead to exceptions.
+	 * @param representation : a String created by calling toDBString() on
+	 * 		another piece.
+	 */
+	public StrategoPiece(String representation)
+	{
+		String[] temp = representation.split(DBInterface.GRID_ITEM_SEPARATOR);
+		rank = RankValues.values()[Integer.parseInt(temp[0])];
+		owner = Integer.parseInt(temp[1]);
+		location_x = Integer.parseInt(temp[2]);
+		location_y = Integer.parseInt(temp[3]);
+		if (Integer.parseInt(temp[4]) == 1)
+		{
+			exposed = true;
+		}
+		else
+		{
+			exposed = false;
+		}
+	}
+	
 	public RankValues getRank()
 	{
 		return rank;
@@ -50,19 +120,19 @@ public class StrategoPiece
 		return owner;
 	}
 	
-	/*****
+	/****
 	 * Retrieves the x-coordinate of the piece.
 	 * @return an int representing the piece's current x-coordinate.
-	 *****/
+	 ****/
 	public int getLocationX()
 	{
 		return location_x;
 	}
 	
-	/*****
+	/****
 	 * Retrieves the y-coordinate of the piece.
 	 * @return an int representing the piece's current y-coordinate.
-	 *****/
+	 ****/
 	public int getLocationY()
 	{
 		return location_y;
@@ -92,28 +162,31 @@ public class StrategoPiece
 	/****
 	 * This function returns a representation of the rank for use in displaying on the board.
 	 * <p>
-	 * Although it returns a String, it can be used as a char without loss of information unless
+	 * Although it returns a String, it can be used as a character without loss of information unless
 	 * more ranks are added, as at present all possible return values are of a single-character 
 	 * String.
 	 ****/
 	public String getRankAsString()
 	{
 		RankValues tempRank = getRank();
-		if (tempRank == RankValues.Bomb)
+		switch (tempRank)
 		{
-			return "B";
-		}
-		else if (tempRank == RankValues.Flag)
-		{
-			return "F";
-		}
-		else if (tempRank == RankValues.Spy)
-		{
-			return "S";
-		}
-		else
-		{
-			return (tempRank.ordinal() + "");
+			case Bomb:
+			{
+				return "B";
+			}
+			case Flag:
+			{
+				return "F";
+			}
+			case Spy:
+			{
+				return "S";
+			}
+			default:
+			{
+				return (tempRank.ordinal() + "");
+			}
 		}
 	}
 	
@@ -124,7 +197,7 @@ public class StrategoPiece
 	 * move more than one space per turn.
 	 * 
 	 * @return an integer representing how far the unit can move.
-	 */
+	 ****/
 	public int getMovementRange()
 	{
 		RankValues tempRank = getRank();
@@ -149,7 +222,7 @@ public class StrategoPiece
 	 * @param attacker : the piece initiating the attack.
 	 * @param defender : the piece under attack.
 	 * @return the victorious piece, or null if a tie occurred.
-	 */
+	 ****/
 	public static StrategoPiece evaluateCombat(StrategoPiece attacker, StrategoPiece defender)
 	{
 		int offense = attacker.getRank().ordinal();
@@ -180,5 +253,27 @@ public class StrategoPiece
 		{
 			return defender;
 		}
+	}
+	
+	/****
+	 * Generates a string representation of this piece, to be used for storing 
+	 * within a database.
+	 ****/
+	public String toDBString()
+	{
+		String result = "";
+		result += getRank().ordinal() + DBInterface.GRID_ITEM_SEPARATOR;
+		result += getOwner() + DBInterface.GRID_ITEM_SEPARATOR;
+		result += getLocationX() + DBInterface.GRID_ITEM_SEPARATOR;
+		result += getLocationY() + DBInterface.GRID_ITEM_SEPARATOR;
+		if (isExposed() == true)
+		{
+			result += "1";
+		}
+		else
+		{
+			result += "0";
+		}
+		return result;
 	}
 }

@@ -46,6 +46,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+//		Useful link for maintaining Bluetooth across activities:
+//	http://stackoverflow.com/questions/17568470/holding-android-bluetooth-connection-through-multiple-activities
+
 /*
 Bluetooth code samples for future development of network play:
 

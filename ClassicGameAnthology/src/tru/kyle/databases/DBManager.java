@@ -42,8 +42,6 @@ public class DBManager
 	private static SQLiteDatabase database;
 	//private static String dbFilename = "Database.db";
 	
-	protected static final String GRID_ITEM_SEPARATOR = ",";
-	protected static final String GRID_ROW_SEPARATOR = "\n";
 	private static final String DB_SUFFIX = "Database.db";
 	private static final String PLAYER_TABLE = "Players";
 	protected static String createTableStatement;
@@ -55,7 +53,8 @@ public class DBManager
 		FileSaver.Game.ConnectFour.toString() + DB_SUFFIX,
 		FileSaver.Game.Pente.toString() + DB_SUFFIX,
 		FileSaver.Game.Reversi.toString() + DB_SUFFIX,
-		FileSaver.Game.Mastermind.toString() + DB_SUFFIX
+		FileSaver.Game.Mastermind.toString() + DB_SUFFIX,
+		FileSaver.Game.Stratego.toString() + DB_SUFFIX
 	};
     
 	protected static final String CREATE_PLAYERS_TABLE = 
@@ -130,14 +129,32 @@ public class DBManager
         		DBInterface.EXTRA_BOOL_BASE_KEY + "2 INTEGER not null" +
         		")";
     
+    protected static final String CREATE_STRATEGO_TABLE = 
+        	BASE_CREATE_STATEMENT + FileSaver.Game.Stratego.toString() + "(" + 
+        		//" _id INTEGER primary key autoincrement, " +
+        		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
+        		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
+        		DBInterface.GRID_HEIGHT_KEY + " INTEGER not null, " +
+        		DBInterface.CURRENT_PLAYER_KEY + " INTEGER not null, " +
+        		DBInterface.TURN_COUNT_KEY + " INTEGER not null, " +
+        		DBInterface.PLAYER_BASE_KEY + "1 TEXT not null, " +
+        		DBInterface.PLAYER_BASE_KEY + "2 TEXT not null, " +
+        		DBInterface.GRID_VALUES_KEY + " TEXT not null, " +
+        		DBInterface.EXTRA_BOOL_BASE_KEY + "1 INTEGER not null, " +
+        		DBInterface.EXTRA_BOOL_BASE_KEY + "2 INTEGER not null" +
+        		")";
+    
     protected static final String[] CREATE_GAME_TABLE_STATEMENTS = {CREATE_PLAYERS_TABLE,
     		CREATE_CONNECT_FOUR_TABLE,
     		CREATE_PENTE_TABLE,
     		CREATE_REVERSI_TABLE,
-    		CREATE_MASTERMIND_TABLE
+    		CREATE_MASTERMIND_TABLE,
+    		CREATE_STRATEGO_TABLE
     		};
     
-    //DBManager is not a class that should be instantiated, so the constructor is private.
+    /****
+     * The DBManager class should not be instantiated, as all its methods are static.
+     ****/
     private DBManager()
     {
     	
@@ -204,7 +221,7 @@ public class DBManager
 			for (int count = 1; count < limit; count++)
 			{
 				temp += "0";
-				temp += DBManager.GRID_ITEM_SEPARATOR;
+				temp += DBInterface.GRID_ITEM_SEPARATOR;
 			}
 			temp += "0";
 			
@@ -478,7 +495,7 @@ public class DBManager
 			for (int count = 1; count < limit; count++)
 			{
 				zeroScores += "0";
-				zeroScores += DBManager.GRID_ITEM_SEPARATOR;
+				zeroScores += DBInterface.GRID_ITEM_SEPARATOR;
 			}
 			zeroScores += "0";
 			

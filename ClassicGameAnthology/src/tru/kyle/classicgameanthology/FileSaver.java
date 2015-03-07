@@ -37,9 +37,9 @@ import android.content.Context;
 public class FileSaver 
 {
 	public static enum SaveType {PLAYERS, GAMES, DATA};
-	public static enum Game {ConnectFour, Pente, Reversi, Mastermind};
+	public static enum Game {ConnectFour, Pente, Reversi, Mastermind, Stratego};
 	//When filling a spinner with game options, these must be stored in order.
-	public static enum GameByLayout {connect_four, pente, reversi, mastermind};
+	public static enum GameByLayout {connect_four, pente, reversi, mastermind, stratego};
 	//Use these for grabbing game filenames.
 	public static enum CaptureType {NONE, REMOVE, CHANGE};
 	public final static String LAYOUT_PREFIX = "activity_";

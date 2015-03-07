@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.util.ArrayList;
+
 import android.content.ContentValues;
 import android.content.Context;
 import tru.kyle.classicgameanthology.FileSaver.Game;
@@ -27,9 +29,6 @@ public class DBInterface
 	/* WARNING: Cursors may be case-sensitive. Keys cannot have upper-case letters. */
 	
 	private final static String LOGTAG = "DBInterface";
-	//This is the base key to use for constructing key names.
-	private final static String PACKAGE_NAME = "tru.kyle.databases.";
-	private final static String ANTHOLOGY_PACKAGE_NAME = "tru.kyle.classicgameanthology.";
 	
 	//These are keys to be used in storing the data for save games.
 	//Any keys ending in an underscore are base keys, requiring number suffixes to indicate player number, etc.
@@ -37,41 +36,40 @@ public class DBInterface
 	public static final String GRID_HEIGHT_KEY = "grid_height";
 	public static final String GRID_WIDTH_KEY = "grid_width";
 	public static final String GRID_VALUES_KEY = "grid_values";
-	public static final String MARKER_VALUES_KEY = "marker_values";
-	public static final String CODE_VALUES_KEY = "code_values";
-	public static final String COLOR_COUNT_KEY = "color_count";
-	public static final String PLAYER_BASE_KEY = "player_";
-	public static final String CAPTURES_BASE_KEY = "captures_";
+	
 	public static final String TURN_COUNT_KEY = "turn_count";
 	public static final String REMAINING_TURNS_KEY = "remaining_turns";
 	public static final String CURRENT_PLAYER_KEY = "current_player";
+	public static final String PLAYER_BASE_KEY = "player_";
+	
+	public static final String CAPTURES_BASE_KEY = "captures_";
 	public static final String EXTRA_STRING_BASE_KEY = "extra_string_";
 	public static final String EXTRA_BOOL_BASE_KEY = "extra_bool_";
-	/*
-	protected static final String GAME_NAME_KEY = PACKAGE_NAME + "_gameName";
-	protected static final String GRID_HEIGHT_KEY = PACKAGE_NAME + "grid_height";
-	protected static final String GRID_WIDTH_KEY = PACKAGE_NAME + "grid_width";
-	protected static final String GRID_VALUES_KEY = PACKAGE_NAME + "grid_values";
-	protected static final String PLAYER_BASE_KEY = PACKAGE_NAME + "player_";
-	protected static final String CAPTURES_BASE_KEY = PACKAGE_NAME + "captures_";
-	protected static final String TURN_COUNT_KEY = PACKAGE_NAME + "turn_count";
-	protected static final String CURRENT_PLAYER_KEY = PACKAGE_NAME + "current_player";
-	*/
+	
+	//Mastermind-specific keys.
+	public static final String MARKER_VALUES_KEY = "marker_values";
+	public static final String CODE_VALUES_KEY = "code_values";
+	public static final String COLOR_COUNT_KEY = "color_count";
+	
+	//Any Stratego-specific keys can go here.
+	
+	public static final String GRID_ITEM_SEPARATOR = ",";
+	public static final String GRID_ROW_SEPARATOR = "\n";
 	
 	//These keys are for use in managing the table of players and retrieving specific player data.
 	//Do not use them for game data, which requires number suffixes.
 	public static final String PLAYER_NAME_KEY = "_player_name";
 	public static final String PLAYER_WINS_KEY = "player_wins";
 	public static final String PLAYER_MATCHES_KEY = "player_matches";
-	/*
-	protected static final String PLAYER_NAME_KEY = PACKAGE_NAME + "player_name";
-	protected static final String PLAYER_WINS_KEY = PACKAGE_NAME + "player_wins";
-	protected static final String PLAYER_MATCHES_KEY = PACKAGE_NAME + "player_matches";
-	*/
 	
 	
-	
-	
+	/****
+     * The DBInterface class should not be instantiated, as all its methods are static.
+     ****/
+	private DBInterface()
+	{
+		
+	}
 	
 	
 	
@@ -108,9 +106,9 @@ public class DBInterface
 			for (int countColumn = 0; countColumn < grid[countRow].length; countColumn++)
 			{
 				result.append(grid[countRow][countColumn]);
-				result.append(DBManager.GRID_ITEM_SEPARATOR);
+				result.append(GRID_ITEM_SEPARATOR);
 			}
-			result.append(DBManager.GRID_ROW_SEPARATOR);
+			result.append(GRID_ROW_SEPARATOR);
 		}
 		return result.toString();
 	}
@@ -118,11 +116,11 @@ public class DBInterface
 	public static int[][] stringToGrid(int height, int width, String parsedGrid)
 	{
 		int[][] result = new int[height][width];
-		String[] rows = parsedGrid.split(DBManager.GRID_ROW_SEPARATOR);
+		String[] rows = parsedGrid.split(GRID_ROW_SEPARATOR);
 		String[] column;
 		for (int countRow = 0; countRow < height; countRow++)
 		{
-			column = rows[countRow].split(DBManager.GRID_ITEM_SEPARATOR);
+			column = rows[countRow].split(GRID_ITEM_SEPARATOR);
 			for (int countColumn = 0; countColumn < width; countColumn++)
 			{
 				result[countRow][countColumn] = Integer.parseInt(column[countColumn]);
@@ -131,13 +129,32 @@ public class DBInterface
 		return result;
 	}
 	
+	public static String[] stringToData(String parsedObjects)
+	{
+		String[] items = parsedObjects.split(DBInterface.GRID_ROW_SEPARATOR);
+		return items;
+	}
+	
+	public static String dataToString(ArrayList<String> items)
+	{
+		int limit = items.size();
+		StringBuilder result = new StringBuilder(limit * (items.get(0).length() + 1));
+		for (int countColumn = 0; countColumn < (limit - 1); countColumn++)
+		{
+			result.append(items.get(countColumn));
+			result.append(GRID_ROW_SEPARATOR);
+		}
+		result.append(items.get(limit - 1));
+		return result.toString();
+	}
+	
 	public static String arrayToString(int[] array)
 	{
 		StringBuilder result = new StringBuilder(array.length * 2 + 1);
 		for (int countColumn = 0; countColumn < (array.length - 1); countColumn++)
 		{
 			result.append(array[countColumn]);
-			result.append(DBManager.GRID_ITEM_SEPARATOR);
+			result.append(GRID_ITEM_SEPARATOR);
 		}
 		result.append(array[array.length - 1]);
 		return result.toString();
@@ -145,7 +162,7 @@ public class DBInterface
 	
 	public static int[] stringToArray(String parsedArray, int length)
 	{
-		String[] columns = parsedArray.split(DBManager.GRID_ITEM_SEPARATOR);
+		String[] columns = parsedArray.split(GRID_ITEM_SEPARATOR);
 		int[] result = new int[length];
 		for (int countColumn = 0; countColumn < result.length; countColumn++)
 		{

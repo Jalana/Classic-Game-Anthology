@@ -1,5 +1,7 @@
 package tru.kyle.classicgameanthology;
 
+import java.util.ArrayList;
+
 import tru.kyle.classicgameanthology.FileSaver.Game;
 import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
 import tru.kyle.databases.DBInterface;
@@ -21,7 +23,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,46 +50,43 @@ public class StrategoActivity extends Activity
 	protected static final String[][] EXTRAS = null;
 	
 	//These are pulled by the MainMenuActivity and used to title checkboxes.
+	private static final String REVEALS = "Permanent Reveals?";
 	private static final String HIGHLIGHTS = "Highlight Moves?";
-	private static final String REVEALS = "Keep Pieces Revealed?";
 	protected static final String[] BOOLEAN_EXTRAS = {
-		HIGHLIGHTS,
-		REVEALS
+		REVEALS,
+		HIGHLIGHTS
 	};
 	
 	public static final Integer[] PLAYERS = {2};
 	public final Game THIS_GAME = Game.Stratego;
 	public final GameByLayout THIS_LAYOUT = GameByLayout.stratego;
 	private final String BUTTON_BACK_EMPTY_STRING = "button_space_empty_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_RED_STRING = "button_space_red_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_BLUE_STRING = "button_border_blue_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_P_1_STRING = "button_space_red_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_P_2_STRING = "button_border_blue_" + THIS_LAYOUT.toString();
 	private final String BUTTON_BACK_MOVABLE_EMPTY_STRING = "button_space_movable_empty_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_MOVABLE_RED_STRING = "button_space_movable_red_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_MOVABLE_BLUE_STRING = "button_border_movable_blue_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_P_1_STRING = "button_space_movable_red_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_P_2_STRING = "button_border_movable_blue_" + THIS_LAYOUT.toString();
 	
 	public static final int VERTICAL_LIMIT = 10;
 	public static final int HORIZONTAL_LIMIT = 10;
-	public static final int TURN_LIMIT = VERTICAL_LIMIT * HORIZONTAL_LIMIT;
 	static final int INVALID = Integer.MIN_VALUE;
-	static final int VALID = Integer.MAX_VALUE;
+	static final int VALID_P = Integer.MAX_VALUE;
+	static final int PLACE_1 = Integer.MAX_VALUE - 1;
+	static final int PLACE_2 = Integer.MAX_VALUE - 2;
 	
-	final char PLAYER_ONE_MARK = 'X';
-	final char PLAYER_TWO_MARK = 'O';
-	final char UNKNOWN_MARK = '?';
-	final char BLANK_MARK = ' ';
+	static final char UNKNOWN_MARK = '?';
+	static final char BLANK_MARK = ' ';
+	private final static String RANK_DRAG_KEY = "rank_value";
 	
-	//This String is used to hold an integer corresponding to a piece's ordinal value.
-	private static final String PIECE_RANK_INDEX_KEY = "piece_index";
-	private static final String X_COORDINATE_KEY = "x_location";
-	private static final String Y_COORDINATE_KEY = "y_location";
 	
 	boolean gameInProgress = false;
+	boolean placementInProgress = true;
 	boolean gameEnded = false;
 	boolean canPressButton;
 	boolean usingGuestNames = false;
+	boolean placementListenersSet = false;
 	
 	int currentTurn = 1;
-	char currentMark;
 	int turnCount;
 	int playerOneScore;
 	int playerTwoScore;
@@ -107,33 +105,38 @@ public class StrategoActivity extends Activity
 	
 	int playerOneColour = Color.RED;
 	int playerTwoColour = Color.BLUE;
+	//The empty 0 index is designed to allow currentTurn to retrieve the value directly.
+	int[] remainingPieces = {0, 40, 40};
 	
 	Button[] placementButtons = new Button[StrategoPiece.RankValues.values().length];
 	Button[] hintButtons = new Button[StrategoPiece.RankValues.values().length];
 	
-	int[][] pointsPlaced = new int[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
 	StrategoPiece[][] gridPieces = new StrategoPiece[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
 	Button[][] gridButtons = new Button[VERTICAL_LIMIT][HORIZONTAL_LIMIT];
 	private StrategoPiece currentAttacker = null;
 	Button[] availableLocationButtons;
 	Drawable[] availableLocationOldBackgrounds;
+	
 	//This checks for invalid locations, since the standard Stratego board has two lakes near the center
 	//	that are unusable for movement.
 	//If an option is ever added to allow variable grid sizes, multiple variations of this array
 	//	may be required.
-	private static final int[][] MOVEMENT_GRID_CHECK = {
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, INVALID, INVALID, VALID, VALID, INVALID, INVALID, VALID, VALID},
-			{VALID, VALID, INVALID, INVALID, VALID, VALID, INVALID, INVALID, VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID},
-			{VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID, 	VALID, VALID}
+	private int[][] movementGridCheck = CLASSIC_GRID_MOVE_CHECK;
+	private int[] pieceLimits = CLASSIC_PIECE_LIMITS;
+	
+	private static final int[][] CLASSIC_GRID_MOVE_CHECK = {
+			{PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1},
+			{PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1},
+			{PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1},
+			{PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1, PLACE_1},
+			{VALID_P, VALID_P, INVALID, INVALID, VALID_P, VALID_P, INVALID, INVALID, VALID_P, VALID_P},
+			{VALID_P, VALID_P, INVALID, INVALID, VALID_P, VALID_P, INVALID, INVALID, VALID_P, VALID_P},
+			{PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2},
+			{PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2},
+			{PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2},
+			{PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2, PLACE_2}
 	};
-	private static final int[] PIECE_LIMITS = {
+	private static final int[] CLASSIC_PIECE_LIMITS = {
 		6, 	//Bombs
 		1, 	//Marshalls
 		1, 	//Generals
@@ -147,11 +150,19 @@ public class StrategoActivity extends Activity
 		1, 	//Spies
 		1	//Flags
 	};
+	
+	private int[] playerOneAvailablePieces = new int[pieceLimits.length];
+	private int[] playerTwoAvailablePieces = new int[pieceLimits.length];
+	
+	int stalemateCheck = 7;
+	
 	String filenameGame;
 	
 	AlertDialog endMatchDialog;
 	AlertDialog saveDialog;
 	AlertDialog overwriteDialog;
+	AlertDialog confirmPlacementDialog;
+	AlertDialog turnChangeDialog;
 	
 	Button previousMove;
 	Button saveGame;
@@ -160,15 +171,13 @@ public class StrategoActivity extends Activity
 	boolean endOfMatch = false;
 	boolean highlightMoves = true;
 	boolean keepReveals = true;
-	MyQueue<Button> lastLines = new MyQueue<Button>();
-	MyQueue<Button> tempLines = new MyQueue<Button>();
 	
 	private Drawable BUTTON_BACK_EMPTY;
-	private Drawable BUTTON_BACK_RED;
-	private Drawable BUTTON_BACK_BLUE;
+	private Drawable BUTTON_BACK_P_1;
+	private Drawable BUTTON_BACK_P_2;
 	private Drawable BUTTON_BACK_MOVABLE_EMPTY;
-	private Drawable BUTTON_BACK_MOVABLE_RED;
-	private Drawable BUTTON_BACK_MOVABLE_BLUE;
+	private Drawable BUTTON_BACK_MOVABLE_P_1;
+	private Drawable BUTTON_BACK_MOVABLE_P_2;
 	
 	protected int buttonSize;
 	MyQueue<Button> tempMoves = new MyQueue<Button>();
@@ -181,11 +190,11 @@ public class StrategoActivity extends Activity
 		
 		Resources res = getResources();
         BUTTON_BACK_EMPTY = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_EMPTY_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_RED = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_RED_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_BLUE = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_BLUE_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_P_1 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_P_1_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_P_2 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_P_2_STRING, "drawable", getPackageName()));
     	BUTTON_BACK_MOVABLE_EMPTY = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_EMPTY_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_MOVABLE_RED = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_RED_STRING, "drawable", getPackageName()));
-    	BUTTON_BACK_MOVABLE_BLUE = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_BLUE_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_MOVABLE_P_1 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_P_1_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_MOVABLE_P_2 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_P_2_STRING, "drawable", getPackageName()));
     	
     	Intent intent = getIntent();
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
@@ -194,7 +203,9 @@ public class StrategoActivity extends Activity
         	filenameGame = FileSaver.AUTOSAVE_NAME;
         }
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
-    	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	//	The new match key cannot be set to false until after placement, since storing placements accurately is not practical
+    	//		before the game has actually started.
+    	//intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -208,7 +219,9 @@ public class StrategoActivity extends Activity
     	
     	if (newMatch == true)
     	{
+    		currentTurn = 1;
     		parseExtras(intent);
+    		setUpPlacement(currentTurn);
     		setButtons(res);
     		resetData();
     	}
@@ -265,8 +278,11 @@ public class StrategoActivity extends Activity
 			}
 		}
 		
-		gameInProgress = true;
-		canPressButton = true;
+		if (placementInProgress == false)
+		{
+			gameInProgress = true;
+			canPressButton = true;
+		}
 		soundPlayer = null;
 	}
 	
@@ -282,7 +298,7 @@ public class StrategoActivity extends Activity
 		//A semi-transparent dialog box, for instance, would trigger this.
 		//In most cases, however, the app will continue to onStop().
 		//Release unneeded resources here, save data, etc.
-		if (gameInProgress == true && usingGuestNames == false && endOfMatch == false)
+		if (usingGuestNames == false && endOfMatch == false)
 		{
 			saveGame(FileSaver.AUTOSAVE_NAME, true);
 		}
@@ -334,13 +350,14 @@ public class StrategoActivity extends Activity
 	
 	private void parseExtras(Intent intent)
 	{
-		highlightMoves = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "1", false);
+		keepReveals = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "1", false);
+		highlightMoves = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "2", false);
 	}
 	
 	
 	//Note that Stratego has two lake areas near the center of the board.
 	//Those must not have listeners registered for them.
-	//Additionally, onDrag listeners must only be registered for the player's pieces,
+	//Additionally, onTouch listeners must only be registered for the player's pieces,
 	//		and the player needs to be able to set up pieces before play.
 	private void setButtons(Resources res)
 	{
@@ -363,10 +380,14 @@ public class StrategoActivity extends Activity
         		currentID += (count2 + 1);
         		resID = res.getIdentifier(currentID, "id", getPackageName());
         		gridButtons[count][count2] = (Button)findViewById(resID);
-        		gridButtons[count][count2].setOnClickListener(grid_handler);
+        		//gridButtons[count][count2].setOnClickListener(grid_handler);
         		if (gameInProgress == false)
         		{
         			gridButtons[count][count2].setText(BLANK_MARK + "");
+        		}
+        		if (movementGridCheck[count][count2] == INVALID)
+        		{
+        			//Set background to a lake drawable.
         		}
         	}
         }
@@ -374,26 +395,41 @@ public class StrategoActivity extends Activity
         for (int count = 0; count < placementButtons.length; count++)
         {
     		currentID = "placement_button_";
-    		if ((count + 1) < 10)
+    		if ((count) < 10)
     		{
     			currentID += '0';
     		}
     		currentID += (count);
     		resID = res.getIdentifier(currentID, "id", getPackageName());
     		placementButtons[count] = (Button)findViewById(resID);
-    		placementButtons[count].setOnDragListener(grid_handler);
+    		if (placementInProgress == true && endOfMatch == false)
+    		{
+    			placementButtons[count].setOnDragListener(placement_drag_handler);
+    		}
+    		else
+    		{
+    			placementButtons[count].setVisibility(View.GONE);
+    		}
         }
         
         for (int count = 0; count < hintButtons.length; count++)
         {
     		currentID = "placement_hint_";
-    		if ((count + 1) < 10)
+    		if ((count) < 10)
     		{
     			currentID += '0';
     		}
     		currentID += (count);
     		resID = res.getIdentifier(currentID, "id", getPackageName());
     		hintButtons[count] = (Button)findViewById(resID);
+    		if (placementInProgress == true && endOfMatch == false)
+    		{
+    			hintButtons[count].setText(pieceLimits[count] + "");
+    		}
+    		else
+    		{
+    			hintButtons[count].setVisibility(View.GONE);
+    		}
         }
 	}
 	
@@ -405,24 +441,7 @@ public class StrategoActivity extends Activity
         {
         	for (countHoriz = 0; countHoriz < gridButtons[countVert].length; countHoriz++)
         	{
-        		switch (pointsPlaced[countVert][countHoriz])
-        		{
-	        		case 1:
-	        		{
-	        			addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
-	        			break;
-	        		}
-	        		case 2:
-	        		{
-	        			addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
-	        			break;
-	        		}
-	        		default:
-	        		{
-	        			gridButtons[countVert][countHoriz].setText(BLANK_MARK + "");
-	        			break;
-	        		}
-        		}
+        		addMark(gridPieces[countVert][countHoriz], gridButtons[countVert][countHoriz]);
         	}
         }
 	}
@@ -430,9 +449,15 @@ public class StrategoActivity extends Activity
 	public void loadGame()
 	{
 		ContentValues values = DBInterface.retrieveSave(this, filenameGame, THIS_GAME);
-		int vertLimit = values.getAsInteger(DBInterface.GRID_HEIGHT_KEY);
-		int horizLimit = values.getAsInteger(DBInterface.GRID_WIDTH_KEY);
 		if (values.getAsInteger(DBInterface.EXTRA_BOOL_BASE_KEY + "1") > 0)
+		{
+			keepReveals = true;
+		}
+		else
+		{
+			keepReveals = false;
+		}
+		if (values.getAsInteger(DBInterface.EXTRA_BOOL_BASE_KEY + "2") > 0)
 		{
 			highlightMoves = true;
 		}
@@ -443,22 +468,17 @@ public class StrategoActivity extends Activity
 		
 		setButtons(this.getResources());
 		
-		pointsPlaced = DBInterface.stringToGrid(vertLimit, horizLimit, 
-				values.getAsString(DBInterface.GRID_VALUES_KEY));
-		for (int countVert = 0; countVert < gridButtons.length; countVert++)
+		String[] piecesAsStrings = DBInterface.stringToData(values.getAsString(DBInterface.GRID_VALUES_KEY));
+		StrategoPiece tempPiece;
+		int vertIndex = 0;
+		int horizIndex = 0;
+		for (int count = 0; count < piecesAsStrings.length; count++)
 		{
-			for (int countHoriz = 0; countHoriz < gridButtons[countVert].length; countHoriz++)
-			{
-				if (pointsPlaced[countVert][countHoriz] != 0)
-				{
-					gridButtons[countVert][countHoriz].setClickable(false);
-					addMark(pointsPlaced[countVert][countHoriz], gridButtons[countVert][countHoriz]);
-				}
-				else
-				{
-					gridButtons[countVert][countHoriz].setClickable(true);
-				}
-			}
+			tempPiece = new StrategoPiece(piecesAsStrings[count]);
+			vertIndex = tempPiece.getLocationX();
+			horizIndex = tempPiece.getLocationY();
+			gridPieces[vertIndex][horizIndex] = tempPiece;
+			addMark(tempPiece, gridButtons[vertIndex][horizIndex]);
 		}
 		
 		currentTurn = values.getAsInteger(DBInterface.CURRENT_PLAYER_KEY);
@@ -467,7 +487,7 @@ public class StrategoActivity extends Activity
 		playerTwoName = values.getAsString(DBInterface.PLAYER_BASE_KEY + "2");
 		if (playerOneName == null || playerTwoName == null)
 		{
-			useGuestNames();
+			//useGuestNames();
 		}
 		updateInterface();
 	}
@@ -476,15 +496,26 @@ public class StrategoActivity extends Activity
 	{
 		ContentValues values = new ContentValues();
 		values.put(DBInterface.GAME_NAME_KEY, name);
-		values.put(DBInterface.GRID_HEIGHT_KEY, pointsPlaced.length);
-		values.put(DBInterface.GRID_WIDTH_KEY, pointsPlaced[0].length);
-		values.put(DBInterface.GRID_VALUES_KEY, DBInterface.gridToString(pointsPlaced));
+		values.put(DBInterface.GRID_HEIGHT_KEY, gridButtons.length);
+		values.put(DBInterface.GRID_WIDTH_KEY, gridButtons[0].length);
+		ArrayList<String> pieces = new ArrayList<String>();
+		for (int vertIndex = 0; vertIndex < gridPieces.length; vertIndex++)
+		{
+			for (int horizIndex = 0; horizIndex < gridPieces[vertIndex].length; horizIndex++)
+			{
+				if (gridPieces[vertIndex][horizIndex] != null)
+				{
+					pieces.add(gridPieces[vertIndex][horizIndex].toDBString());
+				}
+			}
+		}
+		values.put(DBInterface.GRID_VALUES_KEY, DBInterface.dataToString(pieces));
 		values.put(DBInterface.CURRENT_PLAYER_KEY, currentTurn);
 		values.put(DBInterface.TURN_COUNT_KEY, turnCount);
 		values.put(DBInterface.PLAYER_BASE_KEY + "1", playerOneName);
 		values.put(DBInterface.PLAYER_BASE_KEY + "2", playerTwoName);
 		
-		if (highlightMoves == true)
+		if (keepReveals == true)
 		{
 			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "1", 1);
 		}
@@ -492,12 +523,22 @@ public class StrategoActivity extends Activity
 		{
 			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "1", 0);
 		}
+		if (highlightMoves == true)
+		{
+			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "2", 1);
+		}
+		else
+		{
+			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "2", 0);
+		}
 		
 		return DBInterface.insertSave(getApplicationContext(), values, THIS_GAME, overwrite);
 	}
 	
-	//This function calculates the maximum dimensions allowable for the gridButtons, and returns the result.
-	//		Note that the final result is in raw pixels, not density-independent pixels.
+	/****
+	 * 
+	 * @return an integer representing the dimensions to be used for the (square) grid buttons, in raw pixels.
+	 ****/
 	private int getButtonDimensions()
 	{
 		final int UPPER_WINDOW_LIMIT_DP = 35;
@@ -571,19 +612,14 @@ public class StrategoActivity extends Activity
 		{
 			for (int count2 = 0; count2 < gridButtons[count].length; count2++)
 			{
-				gridButtons[count][count2].setClickable(true);
-				//gridButtons[count][count2].setBackgroundColor(Color.WHITE);
+				gridButtons[count][count2].setOnDragListener(null);
+				gridButtons[count][count2].setOnTouchListener(null);
+				gridButtons[count][count2].setBackground(BUTTON_BACK_EMPTY);
+				gridPieces[count][count2] = null;
 			}
 		}
-		for (int count = 0; count < pointsPlaced.length; count++)
-    	{
-    		for (int count2 = 0; count2 < pointsPlaced[count].length; count2++)
-    		{
-    			pointsPlaced[count][count2] = 0;
-    		}
-    	}
 		turnCount = 0;
-		currentMark = PLAYER_ONE_MARK;
+		currentTurn = 1;
 	}
 	
 	public void useGuestNames()
@@ -591,46 +627,204 @@ public class StrategoActivity extends Activity
 		playerOne = new Player("Guest One");
 		playerTwo = new Player("Guest Two");
 		usingGuestNames = true;
-		//Create a dialog that warns the user of how one or more players could not be found.
-		//Inform them that default names are being used and that the game cannot be saved.
-		//Also force a deletion of the current file in use.
-		//Use a toast instead?
 		String temp = "One or more players could not be found. Default names are being used.";
 		temp += "\nThis game cannot be saved.";
 		Toast.makeText(this, temp, Toast.LENGTH_LONG).show();
 	}
 	
 	//
+	//	Placement Functions
+	//
+	
+	/****
+	 * This function prepares the grid for the given player to place their pieces.
+	 * It also acts as a reset function for that player, clearing the grid of anything
+	 * that they had placed previously, like if they chose not to confirm their final placement
+	 * on an earlier occasion.
+	 * @param player 
+	 ****/
+	private void setUpPlacement(final int player)
+	{
+		placementInProgress = true;
+		for (int count = 0; count < pieceLimits.length; count++)
+		{
+			if (player == 1)
+			{
+				playerOneAvailablePieces[count] = pieceLimits[count];
+			}
+			else
+			{
+				playerTwoAvailablePieces[count] = pieceLimits[count];
+			}
+			placementButtons[count].setOnTouchListener(start_placement_handler);
+			hintButtons[count].setText(pieceLimits[count] + "");
+		}
+		
+		int vertIndex;
+		int horizIndex;
+		
+		for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+		{
+			for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+			{
+				if ((player == 1 && movementGridCheck[vertIndex][horizIndex] == PLACE_1) ||
+						(player == 2 && movementGridCheck[vertIndex][horizIndex] == PLACE_2))
+				{
+					gridPieces[vertIndex][horizIndex] = null;
+					gridButtons[vertIndex][horizIndex].setText(BLANK_MARK + "");
+					gridButtons[vertIndex][horizIndex].setOnDragListener(placement_drag_handler);
+				}
+			}
+		}
+	}
+	
+	/****
+	 * Updates the hint displays showing how many of each piece the current player can
+	 * still place.
+	 * @return an integer representing how many pieces in total that player can still place.
+	 ****/
+	public int updateAvailablePieces()
+	{
+		int remainingPieces = 0;
+		if (currentTurn == 1)
+		{
+			for (int count = 0; count < hintButtons.length; count++)
+			{
+				remainingPieces += playerOneAvailablePieces[count];
+				hintButtons[count].setText(playerOneAvailablePieces[count] + "");
+			}
+		}
+		else
+		{
+			for (int count = 0; count < hintButtons.length; count++)
+			{
+				remainingPieces += playerTwoAvailablePieces[count];
+				hintButtons[count].setText(playerTwoAvailablePieces[count] + "");
+			}
+		}
+		return remainingPieces;
+	}
+	
+	private void confirmPlacement()
+	{
+		AlertDialog.Builder confirmPlacementBuilder = new AlertDialog.Builder(this);
+		confirmPlacementBuilder.setTitle("All your pieces have been placed.");
+		confirmPlacementBuilder.setMessage("Do you wish to use this layout?");
+		confirmPlacementBuilder.setCancelable(true);
+		confirmPlacementBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog, int id) 
+			{
+				if (currentTurn == 1)
+				{
+					currentTurn = 2;
+					setUpPlacement(currentTurn);
+				}
+				else
+				{
+					endPlacement();
+				}
+				confirmPlacementDialog.dismiss();
+			}
+		});
+		confirmPlacementBuilder.setNegativeButton("Reset", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				setUpPlacement(currentTurn);
+				confirmPlacementDialog.dismiss();
+			}
+		});
+		
+		confirmPlacementDialog = confirmPlacementBuilder.create();
+		confirmPlacementDialog.show();
+	}
+	
+	private void endPlacement()
+	{
+		for (int count = 0; count < hintButtons.length; count++)
+		{
+			hintButtons[count].setVisibility(View.GONE);
+			placementButtons[count].setOnDragListener(null);
+			placementButtons[count].setVisibility(View.GONE);
+		}
+		placementInProgress = false;
+		gameInProgress = true;
+		currentTurn = 2;
+		swapTurn();
+	}
+	
+	//
 	//	Main Game Functions
 	//
+	
+	/****
+	 * Sets the provided button's text and background based on the piece provided.
+	 * @param piece : the piece at a particular location. May be null to represent an empty location.
+	 * @param location : a button from the playing grid.
+	 ****/
+	public void addMark(StrategoPiece piece, Button location)
+	{
+		if (piece == null)
+		{
+			location.setText(BLANK_MARK + "");
+			location.setBackground(BUTTON_BACK_EMPTY);
+		}
+		else
+		{
+			if (piece.isExposed() == false)
+			{
+				location.setText(BLANK_MARK + "");
+			}
+			else
+			{
+				location.setText(piece.getRankAsString());
+			}
+			if (piece.getOwner() == 1)
+			{
+				location.setTextColor(playerOneColour);
+				location.setBackground(BUTTON_BACK_P_1);
+			}
+			else
+			{
+				location.setTextColor(playerTwoColour);
+				location.setBackground(BUTTON_BACK_P_2);
+			}
+		}
+	}
 	
 	public void swapTurn()
 	{
 		String temp = "It's ";
+		int previous = currentTurn;
 		if (currentTurn == 1)
 		{
 			temp += playerTwoDisplay.getText().toString();
 			currentTurn = 2;
-			currentMark = PLAYER_TWO_MARK;
 			activePlayerDisplay.setTextColor(playerTwoColour);
 		}
 		else
 		{
 			temp += playerOneDisplay.getText().toString();
 			currentTurn = 1;
-			currentMark = PLAYER_ONE_MARK;
 			activePlayerDisplay.setTextColor(playerOneColour);
 		}
 		temp += "'s turn!";
 		activePlayerDisplay.setText(temp);
+		
+		if (remainingPieces[currentTurn] <= stalemateCheck)
+		{
+			if (checkForStalemate(currentTurn) == true)
+			{
+				displayWinner(previous);
+				return;
+			}
+		}
+		showPlayerPieces(currentTurn);
 	}
 	
-	//A function to check if a move would enter one of the "lakes" near the center is required.
-	//		Take the destination button as a parameter, and have a separate 2D array with 
-	//			the gridButtons that make up the lakes?
-	
 	//A function to hide all pieces from view, pending a canceled dialog to change turns.
-	public void hideAllPieces(final int player)
+	public void hideAllPieces()
 	{
 		for (int countVert = 0; countVert < VERTICAL_LIMIT; countVert++)
 		{
@@ -644,6 +838,8 @@ public class StrategoActivity extends Activity
 				{
 					gridButtons[countVert][countHoriz].setText(UNKNOWN_MARK + "");
 				}
+				gridButtons[countVert][countHoriz].setOnTouchListener(null);
+				gridButtons[countVert][countHoriz].setOnDragListener(null);
 			}
 		}
 	}
@@ -659,14 +855,43 @@ public class StrategoActivity extends Activity
 				currentPiece = gridPieces[countVert][countHoriz];
 				if (currentPiece != null)
 				{
-					if (currentPiece.getOwner() == player
-							|| (currentPiece.isExposed() == true && keepReveals == true))
+					if (currentPiece.getOwner() == player ||
+							(currentPiece.isExposed() == true && keepReveals == true))
 					{
 						gridButtons[countVert][countHoriz].setText(currentPiece.getRankAsString());
+						gridButtons[countVert][countHoriz].setOnTouchListener(start_drag_handler);
 					}
 				}
 			}
 		}
+	}
+	
+	public void prepareTurnChange(final int player)
+	{
+		String name = "";
+		if (player == 1)
+		{
+			name = playerOneName;
+		}
+		else
+		{
+			name = playerTwoName;
+		}
+		AlertDialog.Builder turnChangeBuilder = new AlertDialog.Builder(this);
+		turnChangeBuilder.setTitle("It's " + name + "'s turn.");
+		turnChangeBuilder.setMessage("");
+		turnChangeBuilder.setCancelable(true);
+		turnChangeBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				turnChangeDialog.dismiss();
+				swapTurn();
+			}
+		});
+		
+		turnChangeDialog = turnChangeBuilder.create();
+		turnChangeDialog.show();
 	}
 	
 	//A function to calculate the potential locations for movement.
@@ -674,13 +899,13 @@ public class StrategoActivity extends Activity
 	//		availableLocationButtons is a class-level variable set here.
 	//	Also make sure to register drag_handler for these buttons.
 	//	Also check for the lakes; no unit can move into or through those.
-	private void findPotentialMoves(Button b, StrategoPiece piece, final int xLoc, final int yLoc)
+	private void findPotentialMoves(Button b, final int player, final StrategoPiece piece, final int xLoc, final int yLoc)
 	{
 		int range = piece.getMovementRange();
-		scanMovementLine(xLoc, yLoc, range, 1, 0);
-		scanMovementLine(xLoc, yLoc, range, 0, 1);
-		scanMovementLine(xLoc, yLoc, range, -1, 0);
-		scanMovementLine(xLoc, yLoc, range, 0, -1);
+		scanMovementLine(player, xLoc, yLoc, range, 1, 0);
+		scanMovementLine(player, xLoc, yLoc, range, 0, 1);
+		scanMovementLine(player, xLoc, yLoc, range, -1, 0);
+		scanMovementLine(player, xLoc, yLoc, range, 0, -1);
 		availableLocationButtons = new Button[tempMoves.size()];
 		for (int count = 0; count < availableLocationButtons.length; count++)
 		{
@@ -690,7 +915,8 @@ public class StrategoActivity extends Activity
 		tempMoves.clear();
 	}
 	
-	private void scanMovementLine(final int xLoc, final int yLoc, final int range, final int xDir, final int yDir)
+	private void scanMovementLine(final int player, final int xLoc, final int yLoc, 
+			final int range, final int xDir, final int yDir)
 	{
 		int vertCount = 0;
 		int horizCount = 0;
@@ -700,7 +926,8 @@ public class StrategoActivity extends Activity
 			for (int horizIndex = yLoc; horizCount < range && horizIndex >= 0 && horizIndex < HORIZONTAL_LIMIT; 
 					horizIndex += yDir, horizCount++)
 			{
-				if (MOVEMENT_GRID_CHECK[vertIndex][horizIndex] != INVALID)
+				if (movementGridCheck[vertIndex][horizIndex] != INVALID &&
+						(gridPieces[vertIndex][horizIndex] == null || gridPieces[vertIndex][horizIndex].getOwner() != player))
 				{
 					tempMoves.enqueue(gridButtons[vertIndex][horizIndex]);
 				}
@@ -714,13 +941,13 @@ public class StrategoActivity extends Activity
 		for (int count = 0; count < availableLocationButtons.length; count++)
 		{
 			availableLocationOldBackgrounds[count] = availableLocationButtons[count].getBackground();
-			if (availableLocationOldBackgrounds[count] == BUTTON_BACK_RED)
+			if (availableLocationOldBackgrounds[count] == BUTTON_BACK_P_1)
 			{
-				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_RED);
+				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_P_1);
 			}
-			else if (availableLocationOldBackgrounds[count] == BUTTON_BACK_BLUE)
+			else if (availableLocationOldBackgrounds[count] == BUTTON_BACK_P_2)
 			{
-				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_BLUE);
+				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_P_2);
 			}
 			else
 			{
@@ -736,258 +963,41 @@ public class StrategoActivity extends Activity
 			availableLocationButtons[count].setBackground(availableLocationOldBackgrounds[count]);
 			availableLocationButtons[count].setOnDragListener(null);
 		}
-		availableLocationButtons = null;
+		availableLocationButtons = new Button[]{};
 	}
 	
 	//
-	//	Listeners
+	//	Victory Checks
 	//
 	
-	private View.OnDragListener drag_handler = new OnDragListener()
+	/****
+	 * Checks if a player is unable to make any further moves.
+	 * @param player : the player to check.
+	 * @return true if a stalemate was found, or false if the player has a piece that can move.
+	 */
+	public boolean checkForStalemate(final int player)
 	{
-		@Override
-		public boolean onDrag(View v, final DragEvent event) 
+		int vertIndex = 0;
+		int horizIndex = 0;
+		boolean result = true;
+		for (vertIndex = 0; vertIndex < gridButtons.length && result == true; vertIndex++)
 		{
-			boolean handled = false;
-		    switch (event.getAction()) 
-		    {
-			    case DragEvent.ACTION_DRAG_LOCATION:
-			    {
-			    	//Failing to set a true return here causes an exception of the form
-			    	//		"String cannot be cast to Spannable"
-			    	handled = true;
-			    	break;
-			    }
-			    case DragEvent.ACTION_DRAG_STARTED:
-			    {
-			        //To register your view as a potential drop zone for the current view being dragged
-			        //you need to set the event as handled
-			        //
-			        handled = true;
-			        //An important thing to know is that drop zones need to be visible (i.e. their Visibility)
-			        //property set to something other than Gone or Invisible) in order to be considered. A nice workaround
-			        //if you need them hidden initially is to have their layout_height set to 1.
-			        //
-			        break;
-			    }
-			    case DragEvent.ACTION_DRAG_ENTERED:
-			    case DragEvent.ACTION_DRAG_EXITED:
-			    {
-			        //These two states allows you to know when the dragged view is contained atop your drop zone.
-			        //Traditionally you will use that tip to display a focus ring or any other similar mechanism
-			        //to advertise your view as a drop zone to the user.
-			        //
-			    	handled = true;
-			        break;
-			    }
-			    case DragEvent.ACTION_DROP:
-			    {
-			    	Button b = (Button) v;
-					
-					StrategoPiece defendingPiece;
-					int vertIndex;
-					int horizIndex;
-					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
-					{
-						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
-						{
-							if (gridButtons[vertIndex][horizIndex] == b)
-							{
-								defendingPiece = gridPieces[vertIndex][horizIndex];
-								break;
-							}
-						}
-						if (gridButtons[vertIndex][horizIndex] == b)
-						{
-							break;
-						}
-					}
-					
-					if (defendingPiece != null)
-					{
-						defendingPiece.updateCoordinates(vertIndex, horizIndex);
-						StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
-						gridPieces[vertIndex][horizIndex] = victor;
-						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
-						if (victor == currentAttacker)
-						{
-							currentAttacker.updateCoordinates(vertIndex, horizIndex);
-						}
-					}
-					else
-					{
-						gridPieces[vertIndex][horizIndex] = currentAttacker;
-						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
-						currentAttacker.updateCoordinates(vertIndex, horizIndex);
-					}
-			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
-			        //set the Handled value to true like before.
-			        //
-			        handled = true;
-			        //It's also probably time to get a bit of the data associated with the drag to know what
-			        //you want to do with the information.
-			        //
-			        clearPotentialMoves();
-			        break;
-			    }
-			    case DragEvent.ACTION_DRAG_ENDED:
-			    {
-			        //This is the final state, where you still have possibility to cancel the drop happened.
-			        //You will generally want to set Handled to true.
-			        //
-			        handled = true;
-			        break;
-			    }
-		    }
-		    return handled;
-		}
-	};
-	
-	//Placement drag handlers are needed.
-	//	They must account for pieces being replaced (second-guessing one's choices, bad placements, etc.),
-	//		so when a drop is made the current value there must be considered (INVALID can be used for a null)
-	//		and used to restock the array holding however many pieces the player can still place.
-	
-	//This warning must be ignored, as following its suggestion causes the onTouch() function
-	//		to trigger the button's onClick() event, which leads to an infinite loop.
-	@SuppressLint("ClickableViewAccessibility") 
-	private View.OnTouchListener start_drag_handler = new OnTouchListener()
-	{
-		@Override
-		public boolean onTouch(View v, final MotionEvent event) 
-		{
-			Button b = (Button) v;
-			
-			StrategoPiece selectedPiece;
-			int vertIndex;
-			int horizIndex;
-			for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+			for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length && result == true; horizIndex++)
 			{
-				for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+				if (gridPieces[vertIndex][horizIndex] != null)
 				{
-					if (gridButtons[vertIndex][horizIndex] == b)
+					if (gridPieces[vertIndex][horizIndex].getOwner() == player &&
+							gridPieces[vertIndex][horizIndex].getMovementRange() != 0)
 					{
-						selectedPiece = gridPieces[vertIndex][horizIndex];
-						break;
+						result = false;
 					}
 				}
-				if (gridButtons[vertIndex][horizIndex] == b)
-				{
-					break;
-				}
-			}
-			
-			if (selectedPiece != null && event.getAction() == MotionEvent.ACTION_DOWN)
-			{
-				selectedPiece.updateCoordinates(vertIndex, horizIndex);
-				int range = selectedPiece.getMovementRange();
-				if (range > 0)
-				{
-					currentAttacker = selectedPiece;
-					findPotentialMoves(b, selectedPiece, vertIndex, horizIndex);
-					highlightPotentialMoves();
-					//Calculate the button's location, determine the piece currently there,
-			        //		and use those parameters to calculate available movement points.
-					//Register the onDragHandler for the appropriate gridButtons based on those results.
-					//	For movement: 
-					//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
-					//		-Bombs and the Flag cannot move at all.
-					//		-All other pieces move a single square vertically or horizontally.
-					//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
-					
-					b.startDrag(null, new View.DragShadowBuilder(b), null, 0);
-				}
-			}
-			return false;
-		}
-	};
-	
-	private OnClickListener save_listener = new OnClickListener()
-    {
-		@Override
-		public void onClick(View v) 
-		{
-			if (usingGuestNames == false && gameInProgress == true && gameEnded == false)
-			{
-				saveFile();
-				//Create a dialog to prompt the user for a filename.
-				//Have a confirm button (make sure to check that the string provided is not null).
-				//		If possible, also project the list of existing files in a spinner as part of the dialog.
-				//		When confirmed, close the dialog and display a toast informing the user of the successful save.
-				//Also have a cancel button, and allow the dialog itself to be cancelable.
-				//Write an AlertDialog that allows a password input.
-		    	
 			}
 		}
-    };
-    
-    public void saveFile()
-    {
-    	AlertDialog.Builder saveBuilder = new AlertDialog.Builder(this);
-		saveBuilder.setTitle("Enter the save game name:");
-		final EditText input = new EditText(this);
-		saveBuilder.setView(input);
-		saveBuilder.setCancelable(true);
-		saveBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() 
-		{
-			public void onClick(DialogInterface dialog,int id) 
-			{
-				boolean didSave;
-				String name = input.getText().toString();
-				name = name.replaceAll("[^a-zA-Z_0-9 ]", "");
-				didSave = saveGame(name, false);
-				if (didSave == false)
-				{
-					confirmOverwrite(name);
-				}
-				else
-				{
-					saveDialog.dismiss();
-					Toast.makeText(StrategoActivity.this, "This game has been saved as: " + name, Toast.LENGTH_SHORT).show();
-				}
-			}
-		});
-		saveBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
-		{
-			public void onClick(DialogInterface dialog,int id) 
-			{
-				saveDialog.dismiss();
-			}
-		});
-		
-		saveDialog = saveBuilder.create();
-		saveDialog.show();
-    }
-    
-    public void confirmOverwrite(final String name)
-    {
-    	AlertDialog.Builder overwriteBuilder = new AlertDialog.Builder(this);
-		overwriteBuilder.setTitle("The name \n" + name + "\n is already in use");
-		overwriteBuilder.setMessage("Do you want to overwrite the previous file?");
-		overwriteBuilder.setCancelable(true);
-		overwriteBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() 
-		{
-			public void onClick(DialogInterface dialog,int id) 
-			{
-				saveGame(name, true);
-				overwriteDialog.dismiss();
-				saveDialog.dismiss();
-				Toast.makeText(StrategoActivity.this, "This game has been saved as: " + name, Toast.LENGTH_SHORT).show();
-			}
-		});
-		overwriteBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
-		{
-			public void onClick(DialogInterface dialog,int id) 
-			{
-				overwriteDialog.dismiss();
-			}
-		});
-		
-		overwriteDialog = overwriteBuilder.create();
-		overwriteDialog.show();
-    }
-    
-    //This function ends the match, saves the scores, and resets the game.
+		return result;
+	}
+	
+	//This function ends the match, saves the scores, and resets the game.
     //It then creates a dialog that displays the winner, with a single button to return to the main menu.
     public void endOfMatch(int result)
     {
@@ -1090,6 +1100,402 @@ public class StrategoActivity extends Activity
     	activePlayerDisplay.setText(temp);
     	endOfMatch(0);
     }
+	
+	//
+	//	Listeners
+	//
+	
+	private View.OnDragListener drag_handler = new OnDragListener()
+	{
+		@Override
+		public boolean onDrag(View v, final DragEvent event) 
+		{
+			boolean handled = false;
+		    switch (event.getAction()) 
+		    {
+			    case DragEvent.ACTION_DRAG_LOCATION:
+			    {
+			    	//Failing to set a true return here causes an exception of the form
+			    	//		"String cannot be cast to Spannable"
+			    	handled = true;
+			    	break;
+			    }
+			    case DragEvent.ACTION_DRAG_STARTED:
+			    {
+			        //To register your view as a potential drop zone for the current view being dragged
+			        //you need to set the event as handled
+			        //
+			        handled = true;
+			        //An important thing to know is that drop zones need to be visible (i.e. their Visibility)
+			        //property set to something other than Gone or Invisible) in order to be considered. A nice workaround
+			        //if you need them hidden initially is to have their layout_height set to 1.
+			        //
+			        break;
+			    }
+			    case DragEvent.ACTION_DRAG_ENTERED:
+			    case DragEvent.ACTION_DRAG_EXITED:
+			    {
+			        //These two states allows you to know when the dragged view is contained atop your drop zone.
+			        //Traditionally you will use that tip to display a focus ring or any other similar mechanism
+			        //to advertise your view as a drop zone to the user.
+			        //
+			    	handled = true;
+			        break;
+			    }
+			    case DragEvent.ACTION_DROP:
+			    {
+			    	Button b = (Button) v;
+					
+					StrategoPiece defendingPiece = null;
+					int vertIndex = 0;
+					int horizIndex = 0;
+					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+					{
+						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+						{
+							if (gridButtons[vertIndex][horizIndex] == b)
+							{
+								defendingPiece = gridPieces[vertIndex][horizIndex];
+								break;
+							}
+						}
+						if (gridButtons[vertIndex][horizIndex] == b)
+						{
+							break;
+						}
+					}
+					
+					clearPotentialMoves();
+					
+					if (defendingPiece != null)
+					{
+						defendingPiece.updateCoordinates(vertIndex, horizIndex);
+						StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
+						gridPieces[vertIndex][horizIndex] = victor;
+						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						if (victor == currentAttacker)
+						{
+							remainingPieces[defendingPiece.getOwner()] -= 1;
+							currentAttacker.updateCoordinates(vertIndex, horizIndex);
+							if (defendingPiece.getRank() == StrategoPiece.RankValues.Flag)
+							{
+								displayWinner(currentAttacker.getOwner());
+							}
+						}
+					}
+					else
+					{
+						gridPieces[vertIndex][horizIndex] = currentAttacker;
+						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						currentAttacker.updateCoordinates(vertIndex, horizIndex);
+					}
+			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
+			        //set the Handled value to true like before.
+			        //
+			        handled = true;
+			        //It's also probably time to get a bit of the data associated with the drag to know what
+			        //you want to do with the information.
+			        //
+			        break;
+			    }
+			    case DragEvent.ACTION_DRAG_ENDED:
+			    {
+			        //This is the final state, where you still have possibility to cancel the drop happened.
+			        //You will generally want to set Handled to true.
+			        //
+			        handled = true;
+			        break;
+			    }
+		    }
+		    return handled;
+		}
+	};
+	
+	//Placement drag handlers are needed.
+	//	They must account for pieces being replaced (second-guessing one's choices, bad placements, etc.),
+	//		so when a drop is made the current value there must be considered (INVALID can be used for a null)
+	//		and used to restock the array holding however many pieces the player can still place.
+	
+	//This warning must be ignored, as following its suggestion causes the onTouch() function
+	//		to trigger the button's onClick() event, which leads to an infinite loop.
+	@SuppressLint("ClickableViewAccessibility") 
+	private View.OnTouchListener start_drag_handler = new OnTouchListener()
+	{
+		@Override
+		public boolean onTouch(View v, final MotionEvent event) 
+		{
+			Button b = (Button) v;
+			
+			StrategoPiece selectedPiece = null;
+			int vertIndex = 0;
+			int horizIndex = 0;
+			for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+			{
+				for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+				{
+					if (gridButtons[vertIndex][horizIndex] == b)
+					{
+						selectedPiece = gridPieces[vertIndex][horizIndex];
+						break;
+					}
+				}
+				if (gridButtons[vertIndex][horizIndex] == b)
+				{
+					break;
+				}
+			}
+			
+			if (selectedPiece != null && event.getAction() == MotionEvent.ACTION_DOWN)
+			{
+				selectedPiece.updateCoordinates(vertIndex, horizIndex);
+				int range = selectedPiece.getMovementRange();
+				if (range > 0)
+				{
+					currentAttacker = selectedPiece;
+					findPotentialMoves(b, currentAttacker.getOwner(), selectedPiece, vertIndex, horizIndex);
+					highlightPotentialMoves();
+					//Calculate the button's location, determine the piece currently there,
+			        //		and use those parameters to calculate available movement points.
+					//Register the onDragHandler for the appropriate gridButtons based on those results.
+					//	For movement: 
+					//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
+					//		-Bombs and the Flag cannot move at all.
+					//		-All other pieces move a single square vertically or horizontally.
+					//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
+					
+					b.startDrag(null, new View.DragShadowBuilder(b), null, 0);
+				}
+			}
+			return false;
+		}
+	};
+	
+	private View.OnDragListener placement_drag_handler = new OnDragListener()
+	{
+		@Override
+		public boolean onDrag(View v, final DragEvent event) 
+		{
+			boolean handled = false;
+		    switch (event.getAction()) 
+		    {
+			    case DragEvent.ACTION_DRAG_LOCATION:
+			    {
+			    	handled = true;
+			    	break;
+			    }
+			    case DragEvent.ACTION_DRAG_STARTED:
+			    {
+			        handled = true;
+			        break;
+			    }
+			    case DragEvent.ACTION_DRAG_ENTERED:
+			    case DragEvent.ACTION_DRAG_EXITED:
+			    {
+			    	handled = true;
+			        break;
+			    }
+			    case DragEvent.ACTION_DROP:
+			    {
+			    	Button b = (Button) v;
+					
+					StrategoPiece oldPiece = null;
+					int vertIndex = 0;
+					int horizIndex = 0;
+					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+					{
+						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+						{
+							if (gridButtons[vertIndex][horizIndex] == b)
+							{
+								oldPiece = gridPieces[vertIndex][horizIndex];
+								break;
+							}
+						}
+						if (gridButtons[vertIndex][horizIndex] == b)
+						{
+							break;
+						}
+					}
+					
+					if (oldPiece != null)
+					{
+						int oldRank = oldPiece.getRank().ordinal();
+						if (currentTurn == 1 && playerOneAvailablePieces[oldRank] < pieceLimits[oldRank])
+						{
+							playerOneAvailablePieces[oldRank] += 1;
+						}
+						else if (currentTurn == 2 && playerTwoAvailablePieces[oldRank] < pieceLimits[oldRank])
+						{
+							playerTwoAvailablePieces[oldRank] += 1;
+						}
+					}
+					
+					int newRank = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
+					if (currentTurn == 1 && playerOneAvailablePieces[newRank] > 0)
+					{
+						playerOneAvailablePieces[newRank] -= 1;
+						gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_P_1);
+						gridPieces[vertIndex][horizIndex] = new StrategoPiece(
+								StrategoPiece.RankValues.values()[newRank], currentTurn, vertIndex, horizIndex);
+						gridButtons[vertIndex][horizIndex].setText(gridPieces[vertIndex][horizIndex].getRankAsString());
+					}
+					else if (currentTurn == 2 && playerTwoAvailablePieces[newRank] > 0)
+					{
+						playerTwoAvailablePieces[newRank] -= 1;
+						gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_P_2);
+						gridPieces[vertIndex][horizIndex] = new StrategoPiece(
+								StrategoPiece.RankValues.values()[newRank], currentTurn, vertIndex, horizIndex);
+						gridButtons[vertIndex][horizIndex].setText(gridPieces[vertIndex][horizIndex].getRankAsString());
+					}
+					
+					if (updateAvailablePieces() == 0)
+					{
+						for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+						{
+							for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+							{
+								gridButtons[vertIndex][horizIndex].setOnDragListener(null);
+							}
+						}
+						confirmPlacement();
+					}
+					
+			        handled = true;
+			        break;
+			    }
+			    case DragEvent.ACTION_DRAG_ENDED:
+			    {
+			        handled = true;
+			        break;
+			    }
+		    }
+		    return handled;
+		}
+	};
+	
+	//This warning must be ignored, as following its suggestion causes the onTouch() function
+	//		to trigger the button's onClick() event, which leads to an infinite loop.
+	@SuppressLint("ClickableViewAccessibility") 
+	private View.OnTouchListener start_placement_handler = new OnTouchListener()
+	{
+		@Override
+		public boolean onTouch(View v, final MotionEvent event) 
+		{
+			Button b = (Button) v;
+			
+			int pieceRank;
+			for (pieceRank = 0; pieceRank < placementButtons.length; pieceRank++)
+			{
+				if (placementButtons[pieceRank] == b)
+				{
+					break;
+				}
+			}
+			
+			if (event.getAction() == MotionEvent.ACTION_DOWN)
+			{
+				//This stops the drag from occurring if the current player cannot place any more of that piece.
+				if ((currentTurn == 1 && playerOneAvailablePieces[pieceRank] <= 0) ||
+						(currentTurn == 2 && playerTwoAvailablePieces[pieceRank] <= 0))
+				{
+					return false;
+				}
+				else
+				{
+					ClipData data = ClipData.newPlainText(RANK_DRAG_KEY, (pieceRank + ""));
+					b.startDrag(data, new View.DragShadowBuilder(b), null, 0);
+				}
+			}
+			return false;
+		}
+	};
+	
+	private OnClickListener save_listener = new OnClickListener()
+    {
+		@Override
+		public void onClick(View v) 
+		{
+			if (usingGuestNames == false && gameInProgress == true && gameEnded == false)
+			{
+				saveFile();
+				//Create a dialog to prompt the user for a filename.
+				//Have a confirm button (make sure to check that the string provided is not null).
+				//		If possible, also project the list of existing files in a spinner as part of the dialog.
+				//		When confirmed, close the dialog and display a toast informing the user of the successful save.
+				//Also have a cancel button, and allow the dialog itself to be cancelable.
+				//Write an AlertDialog that allows a password input.
+		    	
+			}
+		}
+    };
+    
+    public void saveFile()
+    {
+    	AlertDialog.Builder saveBuilder = new AlertDialog.Builder(this);
+		saveBuilder.setTitle("Enter the save game name:");
+		final EditText input = new EditText(this);
+		saveBuilder.setView(input);
+		saveBuilder.setCancelable(true);
+		saveBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				boolean didSave;
+				String name = input.getText().toString();
+				name = name.replaceAll("[^a-zA-Z_0-9 ]", "");
+				didSave = saveGame(name, false);
+				if (didSave == false)
+				{
+					confirmOverwrite(name);
+				}
+				else
+				{
+					saveDialog.dismiss();
+					Toast.makeText(StrategoActivity.this, "This game has been saved as: " + name, Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		saveBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				saveDialog.dismiss();
+			}
+		});
+		
+		saveDialog = saveBuilder.create();
+		saveDialog.show();
+    }
+    
+    public void confirmOverwrite(final String name)
+    {
+    	AlertDialog.Builder overwriteBuilder = new AlertDialog.Builder(this);
+		overwriteBuilder.setTitle("The name \n" + name + "\n is already in use");
+		overwriteBuilder.setMessage("Do you want to overwrite the previous file?");
+		overwriteBuilder.setCancelable(true);
+		overwriteBuilder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				saveGame(name, true);
+				overwriteDialog.dismiss();
+				saveDialog.dismiss();
+				Toast.makeText(StrategoActivity.this, "This game has been saved as: " + name, Toast.LENGTH_SHORT).show();
+			}
+		});
+		overwriteBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+		{
+			public void onClick(DialogInterface dialog,int id) 
+			{
+				overwriteDialog.dismiss();
+			}
+		});
+		
+		overwriteDialog = overwriteBuilder.create();
+		overwriteDialog.show();
+    }
+    
+    
     
     
 
