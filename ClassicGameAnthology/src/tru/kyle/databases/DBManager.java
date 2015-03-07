@@ -137,6 +137,7 @@ public class DBManager
         		DBInterface.GRID_HEIGHT_KEY + " INTEGER not null, " +
         		DBInterface.CURRENT_PLAYER_KEY + " INTEGER not null, " +
         		DBInterface.TURN_COUNT_KEY + " INTEGER not null, " +
+        		DBInterface.IN_PLACEMENT_KEY + " INTEGER not null, " +
         		DBInterface.PLAYER_BASE_KEY + "1 TEXT not null, " +
         		DBInterface.PLAYER_BASE_KEY + "2 TEXT not null, " +
         		DBInterface.GRID_VALUES_KEY + " TEXT not null, " +
@@ -451,7 +452,13 @@ public class DBManager
 	protected static class DBHelper extends SQLiteOpenHelper
 	{
 		private static final String _LOGTAG = "DBHelper";
-		private static final int _DATABASE_VERSION = 1;
+		private static final int[] _DATABASE_VERSIONS = {1,
+			1,
+			1,
+			1,
+			1,
+			1
+		};
 		private static final String[] DEFAULT_PLAYER_NAMES = {"Joe", "Jane", "Bob", "Sarah"};
 		private String _createTableStatement;
 		private String _dropTableStatement;
@@ -461,7 +468,7 @@ public class DBManager
 		{
 			super(context, 
 					(game == null ? DATABASE_NAMES[0] : DATABASE_NAMES[game.ordinal() + 1]),
-					null, _DATABASE_VERSION);
+					null, (game == null ? _DATABASE_VERSIONS[0] : _DATABASE_VERSIONS[game.ordinal() + 1]));
 			if (game == null)
 			{
 				_createTableStatement = CREATE_PLAYERS_TABLE;

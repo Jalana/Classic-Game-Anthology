@@ -59,9 +59,16 @@ public final class R {
         public static final int button_peg_unplaced_mastermind=0x7f02001c;
         public static final int button_peg_white_mastermind=0x7f02001d;
         public static final int button_peg_yellow_mastermind=0x7f02001e;
-        public static final int ic_launcher=0x7f02001f;
-        public static final int main_menu_checkbox=0x7f020020;
-        public static final int normal_background=0x7f020021;
+        public static final int button_space_blue_stratego=0x7f02001f;
+        public static final int button_space_empty_stratego=0x7f020020;
+        public static final int button_space_lake_stratego=0x7f020021;
+        public static final int button_space_movable_blue_stratego=0x7f020022;
+        public static final int button_space_movable_empty_stratego=0x7f020023;
+        public static final int button_space_movable_red_stratego=0x7f020024;
+        public static final int button_space_red_stratego=0x7f020025;
+        public static final int ic_launcher=0x7f020026;
+        public static final int main_menu_checkbox=0x7f020027;
+        public static final int normal_background=0x7f020028;
     }
     public static final class id {
         public static final int action_menu_about=0x7f0a0185;

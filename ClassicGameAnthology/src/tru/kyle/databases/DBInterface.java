@@ -52,6 +52,7 @@ public class DBInterface
 	public static final String COLOR_COUNT_KEY = "color_count";
 	
 	//Any Stratego-specific keys can go here.
+	public static final String IN_PLACEMENT_KEY = "in_placement";
 	
 	public static final String GRID_ITEM_SEPARATOR = ",";
 	public static final String GRID_ROW_SEPARATOR = "\n";
@@ -131,12 +132,20 @@ public class DBInterface
 	
 	public static String[] stringToData(String parsedObjects)
 	{
+		if (parsedObjects == "")
+		{
+			return new String[]{};
+		}
 		String[] items = parsedObjects.split(DBInterface.GRID_ROW_SEPARATOR);
 		return items;
 	}
 	
 	public static String dataToString(ArrayList<String> items)
 	{
+		if (items == null || items.size() == 0)
+		{
+			return "";
+		}
 		int limit = items.size();
 		StringBuilder result = new StringBuilder(limit * (items.get(0).length() + 1));
 		for (int countColumn = 0; countColumn < (limit - 1); countColumn++)

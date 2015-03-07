@@ -145,12 +145,12 @@ public class StrategoPiece
 	
 	public void revealPiece()
 	{
-		exposed = false;
+		exposed = true;
 	}
 	
 	public void hidePiece()
 	{
-		exposed = true;
+		exposed = false;
 	}
 	
 	public void updateCoordinates(int x, int y)
@@ -208,7 +208,7 @@ public class StrategoPiece
 		else if (tempRank == RankValues.Scout)
 		{
 			//Scouts have indefinite movement in any direction.
-			return 10;
+			return 9;
 		}
 		else
 		{

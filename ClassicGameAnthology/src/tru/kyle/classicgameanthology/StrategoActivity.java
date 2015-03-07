@@ -62,10 +62,12 @@ public class StrategoActivity extends Activity
 	public final GameByLayout THIS_LAYOUT = GameByLayout.stratego;
 	private final String BUTTON_BACK_EMPTY_STRING = "button_space_empty_" + THIS_LAYOUT.toString();
 	private final String BUTTON_BACK_P_1_STRING = "button_space_red_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_P_2_STRING = "button_border_blue_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_P_2_STRING = "button_space_blue_" + THIS_LAYOUT.toString();
 	private final String BUTTON_BACK_MOVABLE_EMPTY_STRING = "button_space_movable_empty_" + THIS_LAYOUT.toString();
 	private final String BUTTON_BACK_MOVABLE_P_1_STRING = "button_space_movable_red_" + THIS_LAYOUT.toString();
-	private final String BUTTON_BACK_MOVABLE_P_2_STRING = "button_border_movable_blue_" + THIS_LAYOUT.toString();
+	private final String BUTTON_BACK_MOVABLE_P_2_STRING = "button_space_movable_blue_" + THIS_LAYOUT.toString();
+	
+	private final String BUTTON_BACK_LAKE_STRING = "button_space_lake_" + THIS_LAYOUT.toString();
 	
 	public static final int VERTICAL_LIMIT = 10;
 	public static final int HORIZONTAL_LIMIT = 10;
@@ -82,7 +84,6 @@ public class StrategoActivity extends Activity
 	boolean gameInProgress = false;
 	boolean placementInProgress = true;
 	boolean gameEnded = false;
-	boolean canPressButton;
 	boolean usingGuestNames = false;
 	boolean placementListenersSet = false;
 	
@@ -179,6 +180,8 @@ public class StrategoActivity extends Activity
 	private Drawable BUTTON_BACK_MOVABLE_P_1;
 	private Drawable BUTTON_BACK_MOVABLE_P_2;
 	
+	private Drawable BUTTON_BACK_LAKE;
+	
 	protected int buttonSize;
 	MyQueue<Button> tempMoves = new MyQueue<Button>();
 	
@@ -195,6 +198,7 @@ public class StrategoActivity extends Activity
     	BUTTON_BACK_MOVABLE_EMPTY = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_EMPTY_STRING, "drawable", getPackageName()));
     	BUTTON_BACK_MOVABLE_P_1 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_P_1_STRING, "drawable", getPackageName()));
     	BUTTON_BACK_MOVABLE_P_2 = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_MOVABLE_P_2_STRING, "drawable", getPackageName()));
+    	BUTTON_BACK_LAKE = res.getDrawable(res.getIdentifier(this.BUTTON_BACK_LAKE_STRING, "drawable", getPackageName()));
     	
     	Intent intent = getIntent();
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
@@ -203,9 +207,7 @@ public class StrategoActivity extends Activity
         	filenameGame = FileSaver.AUTOSAVE_NAME;
         }
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
-    	//	The new match key cannot be set to false until after placement, since storing placements accurately is not practical
-    	//		before the game has actually started.
-    	//intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -221,9 +223,9 @@ public class StrategoActivity extends Activity
     	{
     		currentTurn = 1;
     		parseExtras(intent);
-    		setUpPlacement(currentTurn);
     		setButtons(res);
     		resetData();
+    		setUpPlacement(currentTurn, true);
     	}
     	else
     	{
@@ -256,12 +258,6 @@ public class StrategoActivity extends Activity
 		playerTwoDisplay.setTextColor(playerTwoColour);
 		playerOneDisplay.setText(playerOneName);
 		playerTwoDisplay.setText(playerTwoName);
-		int temp = currentTurn;
-		swapTurn();
-		while (currentTurn != temp)
-		{
-			swapTurn();
-		}
 		//This loop forces the display to be updated correctly.
 		
 		buttonSize = getButtonDimensions();
@@ -278,10 +274,29 @@ public class StrategoActivity extends Activity
 			}
 		}
 		
+		for (int count = 0; count < hintButtons.length; count++)
+		{
+			params = hintButtons[count].getLayoutParams();
+			params.height = buttonSize;
+			params.width = buttonSize;
+			hintButtons[count].setLayoutParams(params);
+			params = placementButtons[count].getLayoutParams();
+			params.height = buttonSize;
+			params.width = buttonSize;
+			placementButtons[count].setLayoutParams(params);
+		}
+		
 		if (placementInProgress == false)
 		{
+			endPlacement();
+			
 			gameInProgress = true;
-			canPressButton = true;
+			int temp = currentTurn;
+			swapTurn();
+			while (currentTurn != temp)
+			{
+				swapTurn();
+			}
 		}
 		soundPlayer = null;
 	}
@@ -306,6 +321,7 @@ public class StrategoActivity extends Activity
 		{
 			soundPlayer.release();
 		}
+		
 	}
 	
 	//The onStop() function is used to dismiss any dialogs that may have been created.
@@ -318,6 +334,15 @@ public class StrategoActivity extends Activity
 		{
 	        endMatchDialog.dismiss();
 	    }
+		if (turnChangeDialog != null && turnChangeDialog.isShowing())
+		{
+			turnChangeDialog.dismiss();
+			swapTurn();
+			if (usingGuestNames == false && endOfMatch == false)
+			{
+				saveGame(FileSaver.AUTOSAVE_NAME, true);
+			}
+		}
 		Log.d("Life Cycle", "Stratego Activity: onStop");
 		//This method turns up when the activity is hidden, like when the user switches to another app.
 		//Release all unneeded resources here, as the system may occasionally skip the onDestroy() if memory is exhausted.
@@ -337,7 +362,6 @@ public class StrategoActivity extends Activity
 	@Override
 	protected void onRestart() 
 	{
-		// TODO Auto-generated method stub
 		super.onRestart();
 		Log.d("Life Cycle", "Stratego Activity: onRestart");
 		//This is called when the activity is being resumed from onStop().
@@ -387,7 +411,7 @@ public class StrategoActivity extends Activity
         		}
         		if (movementGridCheck[count][count2] == INVALID)
         		{
-        			//Set background to a lake drawable.
+        			gridButtons[count][count2].setBackground(BUTTON_BACK_LAKE);
         		}
         	}
         }
@@ -444,6 +468,7 @@ public class StrategoActivity extends Activity
         		addMark(gridPieces[countVert][countHoriz], gridButtons[countVert][countHoriz]);
         	}
         }
+        displayLakes();
 	}
 	
 	public void loadGame()
@@ -464,6 +489,14 @@ public class StrategoActivity extends Activity
 		else
 		{
 			highlightMoves = false;
+		}
+		if (values.getAsInteger(DBInterface.IN_PLACEMENT_KEY) > 0)
+		{
+			placementInProgress = true;
+		}
+		else
+		{
+			placementInProgress = false;
 		}
 		
 		setButtons(this.getResources());
@@ -487,9 +520,13 @@ public class StrategoActivity extends Activity
 		playerTwoName = values.getAsString(DBInterface.PLAYER_BASE_KEY + "2");
 		if (playerOneName == null || playerTwoName == null)
 		{
-			//useGuestNames();
+			useGuestNames();
 		}
 		updateInterface();
+		if (placementInProgress == true)
+		{
+			setUpPlacement(currentTurn, false);
+		}
 	}
 	
 	public boolean saveGame(String name, boolean overwrite)
@@ -512,6 +549,14 @@ public class StrategoActivity extends Activity
 		values.put(DBInterface.GRID_VALUES_KEY, DBInterface.dataToString(pieces));
 		values.put(DBInterface.CURRENT_PLAYER_KEY, currentTurn);
 		values.put(DBInterface.TURN_COUNT_KEY, turnCount);
+		if (placementInProgress == true)
+		{
+			values.put(DBInterface.IN_PLACEMENT_KEY, currentTurn);
+		}
+		else
+		{
+			values.put(DBInterface.IN_PLACEMENT_KEY, 0);
+		}
 		values.put(DBInterface.PLAYER_BASE_KEY + "1", playerOneName);
 		values.put(DBInterface.PLAYER_BASE_KEY + "2", playerTwoName);
 		
@@ -541,8 +586,8 @@ public class StrategoActivity extends Activity
 	 ****/
 	private int getButtonDimensions()
 	{
-		final int UPPER_WINDOW_LIMIT_DP = 35;
-		final int LOWER_WINDOW_LIMIT_DP = 60;
+		final int UPPER_WINDOW_LIMIT_DP = 10;
+		final int LOWER_WINDOW_LIMIT_DP = 20;
 		
 		int result = 0;
 		int actionBarSize = 0;
@@ -582,6 +627,7 @@ public class StrategoActivity extends Activity
 		height -= upperBufferHeight;
 		height -= lowerBufferHeight;
 		
+		int divisor = 1;
 		if (height > width)
 		{
 			result = width;
@@ -591,15 +637,21 @@ public class StrategoActivity extends Activity
 			result = height;
 		}
 		
-		int divisor = 1;
-		if (gridButtons.length < gridButtons[0].length)
-    	{
-    		divisor = gridButtons[0].length;
-    	}
-    	else
-    	{
-    		divisor = gridButtons.length;
-    	}
+		if (placementInProgress == true)
+		{
+			divisor = placementButtons.length + 3;
+		}
+		else
+		{
+			if (gridButtons.length < gridButtons[0].length)
+	    	{
+	    		divisor = gridButtons[0].length + 1;
+	    	}
+	    	else
+	    	{
+	    		divisor = gridButtons.length + 1;
+	    	}
+		}
 		result = result / divisor;
 		
 		return result;
@@ -614,7 +666,14 @@ public class StrategoActivity extends Activity
 			{
 				gridButtons[count][count2].setOnDragListener(null);
 				gridButtons[count][count2].setOnTouchListener(null);
-				gridButtons[count][count2].setBackground(BUTTON_BACK_EMPTY);
+				if (movementGridCheck[count][count2] == INVALID)
+				{
+					gridButtons[count][count2].setBackground(BUTTON_BACK_LAKE);
+				}
+				else
+				{
+					gridButtons[count][count2].setBackground(BUTTON_BACK_EMPTY);
+				}
 				gridPieces[count][count2] = null;
 			}
 		}
@@ -632,32 +691,91 @@ public class StrategoActivity extends Activity
 		Toast.makeText(this, temp, Toast.LENGTH_LONG).show();
 	}
 	
+	private void displayLakes()
+	{
+		for (int vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+		{
+			for (int horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+			{
+				if (movementGridCheck[vertIndex][horizIndex] == INVALID)
+				{
+					gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_LAKE);
+				}
+			}
+		}
+	}
+	
 	//
 	//	Placement Functions
 	//
 	
 	/****
 	 * This function prepares the grid for the given player to place their pieces.
-	 * It also acts as a reset function for that player, clearing the grid of anything
+	 * It can also act as a reset function for that player, clearing the grid of anything
 	 * that they had placed previously, like if they chose not to confirm their final placement
 	 * on an earlier occasion.
 	 * @param player 
+	 * @param overwrite : true indicates that previous placements should be reset.
 	 ****/
-	private void setUpPlacement(final int player)
+	private void setUpPlacement(final int player, boolean overwrite)
 	{
+		hideAllPieces();
+		showPlayerPieces(player);
 		placementInProgress = true;
+		
 		for (int count = 0; count < pieceLimits.length; count++)
 		{
 			if (player == 1)
 			{
 				playerOneAvailablePieces[count] = pieceLimits[count];
+				placementButtons[count].setBackground(BUTTON_BACK_P_1);
+				placementButtons[count].setTextColor(playerOneColour);
+				activePlayerDisplay.setText(playerOneName + ", place your pieces.");
+				activePlayerDisplay.setTextColor(playerOneColour);
 			}
 			else
 			{
 				playerTwoAvailablePieces[count] = pieceLimits[count];
+				placementButtons[count].setBackground(BUTTON_BACK_P_2);
+				placementButtons[count].setTextColor(playerTwoColour);
+				activePlayerDisplay.setText(playerTwoName + ", place your pieces.");
+				activePlayerDisplay.setTextColor(playerTwoColour);
 			}
 			placementButtons[count].setOnTouchListener(start_placement_handler);
 			hintButtons[count].setText(pieceLimits[count] + "");
+		}
+		
+		if (overwrite == false)
+		{
+			for (int vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+			{
+				for (int horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+				{
+					if (gridPieces[vertIndex][horizIndex] != null)
+					{
+						if (player == 1 && gridPieces[vertIndex][horizIndex].getOwner() == player)
+						{
+							playerOneAvailablePieces[gridPieces[vertIndex][horizIndex].getRank().ordinal()] -= 1;
+						}
+						else if (player == 2 && gridPieces[vertIndex][horizIndex].getOwner() == player)
+						{
+							playerTwoAvailablePieces[gridPieces[vertIndex][horizIndex].getRank().ordinal()] -= 1;
+						}
+					}
+				}
+			}
+		}
+		
+		for (int count = 0; count < pieceLimits.length; count++)
+		{
+			if (player == 1)
+			{
+				hintButtons[count].setText(playerOneAvailablePieces[count] + "");
+			}
+			else
+			{
+				hintButtons[count].setText(playerTwoAvailablePieces[count] + "");
+			}
 		}
 		
 		int vertIndex;
@@ -670,24 +788,30 @@ public class StrategoActivity extends Activity
 				if ((player == 1 && movementGridCheck[vertIndex][horizIndex] == PLACE_1) ||
 						(player == 2 && movementGridCheck[vertIndex][horizIndex] == PLACE_2))
 				{
-					gridPieces[vertIndex][horizIndex] = null;
-					gridButtons[vertIndex][horizIndex].setText(BLANK_MARK + "");
+					if (overwrite == true || gridPieces[vertIndex][horizIndex] == null)
+					{
+						gridPieces[vertIndex][horizIndex] = null;
+						addMark(null, gridButtons[vertIndex][horizIndex]);
+					}
 					gridButtons[vertIndex][horizIndex].setOnDragListener(placement_drag_handler);
 				}
 			}
 		}
+		updateAvailablePieces(player);
 	}
 	
 	/****
 	 * Updates the hint displays showing how many of each piece the current player can
 	 * still place.
+	 * @param player : the player to be checked.
 	 * @return an integer representing how many pieces in total that player can still place.
 	 ****/
-	public int updateAvailablePieces()
+	public int updateAvailablePieces(final int player)
 	{
 		int remainingPieces = 0;
-		if (currentTurn == 1)
-		{
+		
+		if (player == 1)
+		{	
 			for (int count = 0; count < hintButtons.length; count++)
 			{
 				remainingPieces += playerOneAvailablePieces[count];
@@ -718,11 +842,12 @@ public class StrategoActivity extends Activity
 				if (currentTurn == 1)
 				{
 					currentTurn = 2;
-					setUpPlacement(currentTurn);
+					setUpPlacement(currentTurn, true);
 				}
 				else
 				{
 					endPlacement();
+					swapTurn();
 				}
 				confirmPlacementDialog.dismiss();
 			}
@@ -731,7 +856,7 @@ public class StrategoActivity extends Activity
 		{
 			public void onClick(DialogInterface dialog,int id) 
 			{
-				setUpPlacement(currentTurn);
+				setUpPlacement(currentTurn, true);
 				confirmPlacementDialog.dismiss();
 			}
 		});
@@ -748,10 +873,12 @@ public class StrategoActivity extends Activity
 			placementButtons[count].setOnDragListener(null);
 			placementButtons[count].setVisibility(View.GONE);
 		}
+		TextView temp = (TextView) findViewById(R.id.placementHintView);
+		temp.setVisibility(View.GONE);
+		temp = (TextView) findViewById(R.id.placementPiecesView);
+		temp.setVisibility(View.GONE);
 		placementInProgress = false;
 		gameInProgress = true;
-		currentTurn = 2;
-		swapTurn();
 	}
 	
 	//
@@ -772,9 +899,10 @@ public class StrategoActivity extends Activity
 		}
 		else
 		{
-			if (piece.isExposed() == false)
+			if (currentTurn != piece.getOwner() && 
+					(piece.isExposed() == false || keepReveals == false))
 			{
-				location.setText(BLANK_MARK + "");
+				location.setText(UNKNOWN_MARK + "");
 			}
 			else
 			{
@@ -795,6 +923,7 @@ public class StrategoActivity extends Activity
 	
 	public void swapTurn()
 	{
+		hideAllPieces();
 		String temp = "It's ";
 		int previous = currentTurn;
 		if (currentTurn == 1)
@@ -811,6 +940,7 @@ public class StrategoActivity extends Activity
 		}
 		temp += "'s turn!";
 		activePlayerDisplay.setText(temp);
+		showPlayerPieces(currentTurn);
 		
 		if (remainingPieces[currentTurn] <= stalemateCheck)
 		{
@@ -820,7 +950,6 @@ public class StrategoActivity extends Activity
 				return;
 			}
 		}
-		showPlayerPieces(currentTurn);
 	}
 	
 	//A function to hide all pieces from view, pending a canceled dialog to change turns.
@@ -834,7 +963,7 @@ public class StrategoActivity extends Activity
 				{
 					gridButtons[countVert][countHoriz].setText(BLANK_MARK + "");
 				}
-				else
+				else //if (gridPieces[countVert][countHoriz].isExposed() == false || keepReveals == false)
 				{
 					gridButtons[countVert][countHoriz].setText(UNKNOWN_MARK + "");
 				}
@@ -858,7 +987,7 @@ public class StrategoActivity extends Activity
 					if (currentPiece.getOwner() == player ||
 							(currentPiece.isExposed() == true && keepReveals == true))
 					{
-						gridButtons[countVert][countHoriz].setText(currentPiece.getRankAsString());
+						addMark(currentPiece, gridButtons[countVert][countHoriz]);
 						gridButtons[countVert][countHoriz].setOnTouchListener(start_drag_handler);
 					}
 				}
@@ -868,19 +997,20 @@ public class StrategoActivity extends Activity
 	
 	public void prepareTurnChange(final int player)
 	{
+		hideAllPieces();
 		String name = "";
 		if (player == 1)
 		{
-			name = playerOneName;
+			name = playerTwoName;
 		}
 		else
 		{
-			name = playerTwoName;
+			name = playerOneName;
 		}
 		AlertDialog.Builder turnChangeBuilder = new AlertDialog.Builder(this);
-		turnChangeBuilder.setTitle("It's " + name + "'s turn.");
+		turnChangeBuilder.setTitle("It is now " + name + "'s turn.");
 		turnChangeBuilder.setMessage("");
-		turnChangeBuilder.setCancelable(true);
+		turnChangeBuilder.setCancelable(false);
 		turnChangeBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() 
 		{
 			public void onClick(DialogInterface dialog,int id) 
@@ -920,17 +1050,22 @@ public class StrategoActivity extends Activity
 	{
 		int vertCount = 0;
 		int horizCount = 0;
-		for (int vertIndex = xLoc; vertCount < range && vertIndex >= 0 && vertIndex < VERTICAL_LIMIT; 
-				vertIndex += xDir, vertCount++)
+		int vertIndex = 0;
+		int horizIndex = 0;
+		for (vertIndex = xLoc + xDir, horizIndex = yLoc + yDir;
+				vertCount < range && vertIndex >= 0 && vertIndex < gridButtons.length && 
+						horizCount < range && horizIndex >= 0 && horizIndex < gridButtons[vertIndex].length; 
+				vertIndex += xDir, vertCount++, horizIndex += yDir, horizCount++)
 		{
-			for (int horizIndex = yLoc; horizCount < range && horizIndex >= 0 && horizIndex < HORIZONTAL_LIMIT; 
-					horizIndex += yDir, horizCount++)
+			if (movementGridCheck[vertIndex][horizIndex] != INVALID &&
+					(gridPieces[vertIndex][horizIndex] == null || gridPieces[vertIndex][horizIndex].getOwner() != player))
 			{
-				if (movementGridCheck[vertIndex][horizIndex] != INVALID &&
-						(gridPieces[vertIndex][horizIndex] == null || gridPieces[vertIndex][horizIndex].getOwner() != player))
-				{
-					tempMoves.enqueue(gridButtons[vertIndex][horizIndex]);
-				}
+				tempMoves.enqueue(gridButtons[vertIndex][horizIndex]);
+			}
+			
+			if (gridPieces[vertIndex][horizIndex] != null)
+			{
+				return;
 			}
 		}
 	}
@@ -961,6 +1096,13 @@ public class StrategoActivity extends Activity
 		for (int count = 0; count < availableLocationButtons.length; count++)
 		{
 			availableLocationButtons[count].setBackground(availableLocationOldBackgrounds[count]);
+		}
+	}
+	
+	private void resetDragHandlers()
+	{
+		for (int count = 0; count < availableLocationButtons.length; count++)
+		{
 			availableLocationButtons[count].setOnDragListener(null);
 		}
 		availableLocationButtons = new Button[]{};
@@ -1027,9 +1169,8 @@ public class StrategoActivity extends Activity
         			new String[]{playerOneName, playerTwoName}, THIS_GAME, winners);
     	}
     	
-    	canPressButton = false;
     	gameInProgress = false;
-    	resetData();
+    	//resetData();
     	
     	final String temp2 = temp;
     	Toast.makeText(this, temp2, Toast.LENGTH_SHORT).show();
@@ -1145,10 +1286,12 @@ public class StrategoActivity extends Activity
 			    case DragEvent.ACTION_DROP:
 			    {
 			    	Button b = (Button) v;
+			    	boolean victoryDetected = false;
 					
 					StrategoPiece defendingPiece = null;
 					int vertIndex = 0;
 					int horizIndex = 0;
+					boolean foundMatch = false;
 					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 					{
 						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
@@ -1156,10 +1299,11 @@ public class StrategoActivity extends Activity
 							if (gridButtons[vertIndex][horizIndex] == b)
 							{
 								defendingPiece = gridPieces[vertIndex][horizIndex];
+								foundMatch = true;
 								break;
 							}
 						}
-						if (gridButtons[vertIndex][horizIndex] == b)
+						if (foundMatch == true)
 						{
 							break;
 						}
@@ -1169,10 +1313,13 @@ public class StrategoActivity extends Activity
 					
 					if (defendingPiece != null)
 					{
+						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						addMark(null, gridButtons[currentAttacker.getLocationX()][currentAttacker.getLocationY()]);
 						defendingPiece.updateCoordinates(vertIndex, horizIndex);
 						StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
 						gridPieces[vertIndex][horizIndex] = victor;
-						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
+						addMark(victor, gridButtons[vertIndex][horizIndex]);
+						
 						if (victor == currentAttacker)
 						{
 							remainingPieces[defendingPiece.getOwner()] -= 1;
@@ -1180,19 +1327,48 @@ public class StrategoActivity extends Activity
 							if (defendingPiece.getRank() == StrategoPiece.RankValues.Flag)
 							{
 								displayWinner(currentAttacker.getOwner());
+								victoryDetected = true;
 							}
 						}
+						else
+						{
+							remainingPieces[currentAttacker.getOwner()] -= 1;
+							if (victor == null)
+							{
+								remainingPieces[defendingPiece.getOwner()] -= 1;
+							}
+						}
+						
+						String message = "A " + currentAttacker.getRank().toString() + 
+								" attacked a " + defendingPiece.getRank().toString() + ".";
+						if (victor != null)
+						{
+							victor.revealPiece();
+							message += "\nThe " + victor.getRank().toString() + " was victorious.";
+						}
+						else
+						{
+							message += "\nBoth pieces were destroyed.";
+						}
+						Toast.makeText(StrategoActivity.this, message, Toast.LENGTH_SHORT).show();
 					}
 					else
 					{
+						addMark(null, gridButtons[currentAttacker.getLocationX()][currentAttacker.getLocationY()]);
 						gridPieces[vertIndex][horizIndex] = currentAttacker;
 						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
 						currentAttacker.updateCoordinates(vertIndex, horizIndex);
+						addMark(currentAttacker, b);
 					}
 			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
 			        //set the Handled value to true like before.
 			        //
 			        handled = true;
+			        resetDragHandlers();
+			        if (victoryDetected == false)
+			        {
+			        	prepareTurnChange(currentAttacker.getOwner());
+			        }
 			        //It's also probably time to get a bit of the data associated with the drag to know what
 			        //you want to do with the information.
 			        //
@@ -1203,6 +1379,7 @@ public class StrategoActivity extends Activity
 			        //This is the final state, where you still have possibility to cancel the drop happened.
 			        //You will generally want to set Handled to true.
 			        //
+			    	clearPotentialMoves();
 			        handled = true;
 			        break;
 			    }
@@ -1229,6 +1406,7 @@ public class StrategoActivity extends Activity
 			StrategoPiece selectedPiece = null;
 			int vertIndex = 0;
 			int horizIndex = 0;
+			boolean foundMatch = false;
 			for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 			{
 				for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
@@ -1236,10 +1414,11 @@ public class StrategoActivity extends Activity
 					if (gridButtons[vertIndex][horizIndex] == b)
 					{
 						selectedPiece = gridPieces[vertIndex][horizIndex];
+						foundMatch = true;
 						break;
 					}
 				}
-				if (gridButtons[vertIndex][horizIndex] == b)
+				if (foundMatch == true)
 				{
 					break;
 				}
@@ -1301,20 +1480,28 @@ public class StrategoActivity extends Activity
 					StrategoPiece oldPiece = null;
 					int vertIndex = 0;
 					int horizIndex = 0;
-					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+					boolean foundMatch = false;
+					for (vertIndex = 0; vertIndex < gridButtons.length && foundMatch == false; vertIndex++)
 					{
 						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
 						{
 							if (gridButtons[vertIndex][horizIndex] == b)
 							{
 								oldPiece = gridPieces[vertIndex][horizIndex];
+								foundMatch = true;
 								break;
 							}
 						}
-						if (gridButtons[vertIndex][horizIndex] == b)
+						if (foundMatch == true)
 						{
 							break;
 						}
+					}
+					
+					if (foundMatch == false)
+					{
+						handled = true;
+						break;
 					}
 					
 					if (oldPiece != null)
@@ -1334,21 +1521,19 @@ public class StrategoActivity extends Activity
 					if (currentTurn == 1 && playerOneAvailablePieces[newRank] > 0)
 					{
 						playerOneAvailablePieces[newRank] -= 1;
-						gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_P_1);
 						gridPieces[vertIndex][horizIndex] = new StrategoPiece(
 								StrategoPiece.RankValues.values()[newRank], currentTurn, vertIndex, horizIndex);
-						gridButtons[vertIndex][horizIndex].setText(gridPieces[vertIndex][horizIndex].getRankAsString());
+						addMark(gridPieces[vertIndex][horizIndex], gridButtons[vertIndex][horizIndex]);
 					}
 					else if (currentTurn == 2 && playerTwoAvailablePieces[newRank] > 0)
 					{
 						playerTwoAvailablePieces[newRank] -= 1;
-						gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_P_2);
 						gridPieces[vertIndex][horizIndex] = new StrategoPiece(
 								StrategoPiece.RankValues.values()[newRank], currentTurn, vertIndex, horizIndex);
-						gridButtons[vertIndex][horizIndex].setText(gridPieces[vertIndex][horizIndex].getRankAsString());
+						addMark(gridPieces[vertIndex][horizIndex], gridButtons[vertIndex][horizIndex]);
 					}
 					
-					if (updateAvailablePieces() == 0)
+					if (updateAvailablePieces(currentTurn) == 0)
 					{
 						for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 						{
