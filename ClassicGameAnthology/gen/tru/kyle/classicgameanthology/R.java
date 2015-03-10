@@ -489,9 +489,12 @@ public final class R {
         public static final int view_standings=0x7f090007;
     }
     public static final class raw {
-        public static final int doorbell_one=0x7f040000;
-        public static final int fireworks_explosion=0x7f040001;
-        public static final int fireworks_finale=0x7f040002;
+        public static final int defeat=0x7f040000;
+        public static final int enemy_move=0x7f040001;
+        public static final int lost_piece=0x7f040002;
+        public static final int normal_move=0x7f040003;
+        public static final int victory=0x7f040004;
+        public static final int warning=0x7f040005;
     }
     public static final class string {
         public static final int action_menu_about=0x7f060002;

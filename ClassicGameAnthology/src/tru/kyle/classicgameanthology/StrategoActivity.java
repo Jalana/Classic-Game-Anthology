@@ -23,6 +23,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DragEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -321,7 +322,10 @@ public class StrategoActivity extends Activity
 		{
 			soundPlayer.release();
 		}
-		
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in StrategoActivity (onPause) returned true.");
+		}
 	}
 	
 	//The onStop() function is used to dismiss any dialogs that may have been created.
@@ -344,6 +348,10 @@ public class StrategoActivity extends Activity
 			}
 		}
 		Log.d("Life Cycle", "Stratego Activity: onStop");
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in StrategoActivity (onStop) returned true.");
+		}
 		//This method turns up when the activity is hidden, like when the user switches to another app.
 		//Release all unneeded resources here, as the system may occasionally skip the onDestroy() if memory is exhausted.
 		//Also save any data necessary.
@@ -357,6 +365,10 @@ public class StrategoActivity extends Activity
 		
 		Log.d("Life Cycle", "Stratego Activity: onDestroy");
 		//Note that the app is destroyed and recreated whenever the orientation changes.
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in StrategoActivity (onDestroy) returned true.");
+		}
 	}
 
 	@Override
@@ -502,16 +514,23 @@ public class StrategoActivity extends Activity
 		setButtons(this.getResources());
 		
 		String[] piecesAsStrings = DBInterface.stringToData(values.getAsString(DBInterface.GRID_VALUES_KEY));
-		StrategoPiece tempPiece;
-		int vertIndex = 0;
-		int horizIndex = 0;
-		for (int count = 0; count < piecesAsStrings.length; count++)
+		if (piecesAsStrings != null)
 		{
-			tempPiece = new StrategoPiece(piecesAsStrings[count]);
-			vertIndex = tempPiece.getLocationX();
-			horizIndex = tempPiece.getLocationY();
-			gridPieces[vertIndex][horizIndex] = tempPiece;
-			addMark(tempPiece, gridButtons[vertIndex][horizIndex]);
+			StrategoPiece tempPiece;
+			int vertIndex = 0;
+			int horizIndex = 0;
+			for (int count = 0; count < piecesAsStrings.length; count++)
+			{
+				if (piecesAsStrings[count] == "")
+				{
+					continue;
+				}
+				tempPiece = new StrategoPiece(piecesAsStrings[count]);
+				vertIndex = tempPiece.getLocationX();
+				horizIndex = tempPiece.getLocationY();
+				gridPieces[vertIndex][horizIndex] = tempPiece;
+				addMark(tempPiece, gridButtons[vertIndex][horizIndex]);
+			}
 		}
 		
 		currentTurn = values.getAsInteger(DBInterface.CURRENT_PLAYER_KEY);
@@ -1017,6 +1036,7 @@ public class StrategoActivity extends Activity
 			{
 				turnChangeDialog.dismiss();
 				swapTurn();
+				playSound(MainMenuActivity.ENEMY_MOVE_SOUND);
 			}
 		});
 		
@@ -1208,8 +1228,7 @@ public class StrategoActivity extends Activity
 	//It then calls endOfMatch() with an integer representing who won.
     public void displayWinner(int winner)
     {
-    	soundPlayer = MediaPlayer.create(StrategoActivity.this,R.raw.fireworks_finale);
-    	soundPlayer.start();
+    	playSound(MainMenuActivity.VICTORY_SOUND);
     	String temp;
     	int result;
     	if (winner == 1)
@@ -1351,6 +1370,10 @@ public class StrategoActivity extends Activity
 							message += "\nBoth pieces were destroyed.";
 						}
 						Toast.makeText(StrategoActivity.this, message, Toast.LENGTH_SHORT).show();
+						if (victoryDetected == false)
+						{
+							playSound(MainMenuActivity.LOST_PIECE_SOUND);
+						}
 					}
 					else
 					{
@@ -1359,6 +1382,7 @@ public class StrategoActivity extends Activity
 						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
 						currentAttacker.updateCoordinates(vertIndex, horizIndex);
 						addMark(currentAttacker, b);
+						playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
 					}
 			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
 			        //set the Handled value to true like before.
@@ -1600,16 +1624,10 @@ public class StrategoActivity extends Activity
 		@Override
 		public void onClick(View v) 
 		{
-			if (usingGuestNames == false && gameInProgress == true && gameEnded == false)
+			if (usingGuestNames == false && endOfMatch == false &&
+					(gameInProgress == true || placementInProgress == true))
 			{
 				saveFile();
-				//Create a dialog to prompt the user for a filename.
-				//Have a confirm button (make sure to check that the string provided is not null).
-				//		If possible, also project the list of existing files in a spinner as part of the dialog.
-				//		When confirmed, close the dialog and display a toast informing the user of the successful save.
-				//Also have a cancel button, and allow the dialog itself to be cancelable.
-				//Write an AlertDialog that allows a password input.
-		    	
 			}
 		}
     };
@@ -1682,7 +1700,31 @@ public class StrategoActivity extends Activity
     
     
     
+    private void playSound(int soundID)
+    {
+    	if (soundPlayer != null)
+		{
+			try
+			{
+    			soundPlayer.stop();
+    			soundPlayer.release();
+			}
+			catch (IllegalStateException e)
+			{
+				
+			}
+		}
+		soundPlayer = MediaPlayer.create(StrategoActivity.this, soundID);
+    	soundPlayer.start();
+    }
     
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.stratego, menu);
+		return true;
+	}
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) 

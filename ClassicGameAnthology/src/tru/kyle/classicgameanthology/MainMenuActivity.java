@@ -48,6 +48,13 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 //		Useful link for maintaining Bluetooth across activities:
 //	http://stackoverflow.com/questions/17568470/holding-android-bluetooth-connection-through-multiple-activities
+//
+//		So far, the only effective way to prevent a possible leaked Bluetooth connection on application closure
+//	appears to be releasing it in the onDestroy() callback in the MainMenuActivity, as otherwise isFinishing() is
+//	not guaranteed to return true. Releasing it without that check is not a feasible option, as otherwise a release
+//	would occur every time the device was rotated, breaking the connection at undesirable times.
+//		
+//	
 
 /*
 Bluetooth code samples for future development of network play:
@@ -206,6 +213,12 @@ public class MainMenuActivity extends Activity
 	public final static String GET_EXTRAS_METHOD = "getExtras";
 	public final static String GET_BOOLS_METHOD = "getBoolExtras";
 	
+	protected static final int NORMAL_MOVE_SOUND = R.raw.normal_move;
+	protected static final int LOST_PIECE_SOUND = R.raw.lost_piece;
+	protected static final int ENEMY_MOVE_SOUND = R.raw.enemy_move;
+	protected static final int WARNING_SOUND = R.raw.warning;
+	protected static final int VICTORY_SOUND = R.raw.victory;
+	protected static final int DEFEAT_SOUND = R.raw.defeat;
 	
 	AlertDialog mainMenuDialog;
 	AlertDialog deleteSaveDialog;
@@ -849,6 +862,10 @@ public class MainMenuActivity extends Activity
 		//A semi-transparent dialog box, for instance, would trigger this.
 		//In most cases, however, the app will continue to onStop().
 		//Release unneeded resources here, save data, etc.
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in MainMenuActivity (onPause) returned true.");
+		}
 	}
 
 	//The onStop() function is used to dismiss any dialogs that may have been created.
@@ -863,6 +880,10 @@ public class MainMenuActivity extends Activity
 	    }
 		activityShift = false;
 		Log.d("Life Cycle", "Main Activity: onStop");
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in MainMenuActivity (onStop) returned true.");
+		}
 		//This method turns up when the activity is hidden, like when the user switches to another app.
 		//Release all unneeded resources here, as the system may occasionally skip the onDestroy() if memory is exhausted.
 		//Also save any data necessary.
@@ -874,6 +895,10 @@ public class MainMenuActivity extends Activity
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		Log.d("Life Cycle", "Main Activity: onDestroy");
+		if (isFinishing() == true)
+		{
+			Log.d("Life Cycle", "isFinishing() in MainMenuActivity (onDestroy) returned true.");
+		}
 		//Note that the app is destroyed and recreated whenever the orientation changes.
 	}
 

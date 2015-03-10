@@ -1173,6 +1173,7 @@ public class MastermindActivity extends Activity
 				else
 				{
 					//Continue the game.
+					playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
 					updateCurrentRow();
 				}
 			}
@@ -1337,14 +1338,13 @@ public class MastermindActivity extends Activity
 		String[] winners = new String[1];
     	if (playerWon == true)
     	{
-    		soundPlayer = MediaPlayer.create(MastermindActivity.this,R.raw.fireworks_finale);
-        	soundPlayer.start();
+    		playSound(MainMenuActivity.VICTORY_SOUND);
         	temp = "Congratulations on cracking the code!";
         	winners[0] = playerOneName;
     	}
     	else
     	{
-    		//If available, find an appropriate sound effect to play here.
+    		playSound(MainMenuActivity.DEFEAT_SOUND);
     		temp = "You failed to crack the code.";
     		winners = null;
     	}
@@ -1397,7 +1397,6 @@ public class MastermindActivity extends Activity
 			{
 				try
 				{
-					soundPlayer.pause();
 					soundPlayer.stop();
 					soundPlayer.release();
 				}
@@ -1478,6 +1477,24 @@ public class MastermindActivity extends Activity
     }
     
     
+    
+    private void playSound(int soundID)
+    {
+    	if (soundPlayer != null)
+		{
+			try
+			{
+    			soundPlayer.stop();
+    			soundPlayer.release();
+			}
+			catch (IllegalStateException e)
+			{
+				
+			}
+		}
+		soundPlayer = MediaPlayer.create(MastermindActivity.this, soundID);
+    	soundPlayer.start();
+    }
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 

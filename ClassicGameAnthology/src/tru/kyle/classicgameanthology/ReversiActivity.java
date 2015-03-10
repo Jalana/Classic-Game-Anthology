@@ -833,13 +833,7 @@ public class ReversiActivity extends Activity
 	            	previousMove = B;
 	            	pointsPlaced[count][count2] = value;
 	            	
-	            	if (soundPlayer != null)
-	    			{
-	    				soundPlayer.pause();
-	    				//soundPlayer.stop();
-	    			}
-	            	soundPlayer = MediaPlayer.create(ReversiActivity.this, R.raw.doorbell_one);
-	            	soundPlayer.start();
+	            	playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
 	            	countPieces();
 	            	
 	            	swapTurn();
@@ -1104,8 +1098,7 @@ public class ReversiActivity extends Activity
 	//It then calls endOfMatch() with an integer representing who won.
     public void displayWinner(int winner)
     {
-    	soundPlayer = MediaPlayer.create(ReversiActivity.this,R.raw.fireworks_finale);
-    	soundPlayer.start();
+    	playSound(MainMenuActivity.VICTORY_SOUND);
     	String temp;
     	int result;
     	if (winner == 1)
@@ -1132,6 +1125,7 @@ public class ReversiActivity extends Activity
     //This function simply displays that there was a tie, then calls endOfMatch().
     public void displayTie()
     {
+    	playSound(MainMenuActivity.DEFEAT_SOUND);
     	String temp;
     	temp = "Sorry, but nobody won this match.";
     	activePlayerDisplay.setText(temp);
@@ -1197,6 +1191,24 @@ public class ReversiActivity extends Activity
 		//This is called when the activity is being resumed from onStop().
 		//It then goes to onStart() and onResume().
 	}
+	
+	private void playSound(int soundID)
+    {
+    	if (soundPlayer != null)
+		{
+			try
+			{
+    			soundPlayer.stop();
+    			soundPlayer.release();
+			}
+			catch (IllegalStateException e)
+			{
+				
+			}
+		}
+		soundPlayer = MediaPlayer.create(ReversiActivity.this, soundID);
+    	soundPlayer.start();
+    }
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) 

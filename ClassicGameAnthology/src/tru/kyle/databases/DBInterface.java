@@ -134,7 +134,7 @@ public class DBInterface
 	{
 		if (parsedObjects == "")
 		{
-			return new String[]{};
+			return null;
 		}
 		String[] items = parsedObjects.split(DBInterface.GRID_ROW_SEPARATOR);
 		return items;

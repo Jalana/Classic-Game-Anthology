@@ -905,20 +905,18 @@ public class PenteActivity extends Activity
             	{
             		highlightMoves(B);
             	}
-            	if (soundPlayer != null)
-    			{
-    				soundPlayer.pause();
-    				//soundPlayer.stop();
-    			}
-            	if (true == highlightMoves && (lastLines.isEmpty() == false || capturedPieces > 0))
+            	if (true == highlightMoves && lastLines.isEmpty() == false)
             	{
-            		soundPlayer = MediaPlayer.create(PenteActivity.this, R.raw.fireworks_explosion);
+            		playSound(MainMenuActivity.WARNING_SOUND);
+            	}
+            	else if (true == highlightMoves && capturedPieces > 0)
+            	{
+            		playSound(MainMenuActivity.LOST_PIECE_SOUND);
             	}
             	else
             	{
-            		soundPlayer = MediaPlayer.create(PenteActivity.this, R.raw.doorbell_one);
+            		playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
             	}
-            	soundPlayer.start();
             	
             	swapTurn();
             	
@@ -1176,8 +1174,7 @@ public class PenteActivity extends Activity
 	//It then calls endOfMatch() with an integer representing who won.
     public void displayWinner(int winner)
     {
-    	soundPlayer = MediaPlayer.create(PenteActivity.this,R.raw.fireworks_finale);
-    	soundPlayer.start();
+    	playSound(MainMenuActivity.VICTORY_SOUND);
     	String temp;
     	int result;
     	if (winner == 1)
@@ -1204,6 +1201,7 @@ public class PenteActivity extends Activity
     //This function simply displays that there was a tie, then calls endOfMatch().
     public void displayTie()
     {
+    	playSound(MainMenuActivity.DEFEAT_SOUND);
     	String temp;
     	temp = "Sorry, but nobody won this match.";
     	activePlayerDisplay.setText(temp);
@@ -1269,6 +1267,24 @@ public class PenteActivity extends Activity
 		//This is called when the activity is being resumed from onStop().
 		//It then goes to onStart() and onResume().
 	}
+	
+	private void playSound(int soundID)
+    {
+    	if (soundPlayer != null)
+		{
+			try
+			{
+    			soundPlayer.stop();
+    			soundPlayer.release();
+			}
+			catch (IllegalStateException e)
+			{
+				
+			}
+		}
+		soundPlayer = MediaPlayer.create(PenteActivity.this, soundID);
+    	soundPlayer.start();
+    }
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) 
