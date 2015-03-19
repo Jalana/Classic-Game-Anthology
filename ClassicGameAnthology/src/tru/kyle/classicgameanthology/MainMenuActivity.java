@@ -46,7 +46,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-//		Useful link for maintaining Bluetooth across activities:
+//		Useful links for maintaining Bluetooth across activities:
+//	http://developer.android.com/guide/components/services.html
+//	http://developer.android.com/guide/components/bound-services.html
 //	http://stackoverflow.com/questions/17568470/holding-android-bluetooth-connection-through-multiple-activities
 //
 //		So far, the only effective way to prevent a possible leaked Bluetooth connection on application closure

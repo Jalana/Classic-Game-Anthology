@@ -4,8 +4,6 @@ import tru.kyle.databases.DBInterface;
 
 public class StrategoPiece 
 {
-	private static final String LOGTAG = "StrategoPiece";
-	
 	/*
 	final static int CLASSIC_KEY = 1;
 	final static int FANTASY_KEY = 2;

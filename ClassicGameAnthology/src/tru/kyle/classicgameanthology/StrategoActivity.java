@@ -54,8 +54,8 @@ public class StrategoActivity extends Activity
 	private static final String REVEALS = "Permanent Reveals?";
 	private static final String HIGHLIGHTS = "Highlight Moves?";
 	protected static final String[] BOOLEAN_EXTRAS = {
-		REVEALS,
-		HIGHLIGHTS
+		REVEALS//,
+		//HIGHLIGHTS
 	};
 	
 	public static final Integer[] PLAYERS = {2};
@@ -318,10 +318,6 @@ public class StrategoActivity extends Activity
 		{
 			saveGame(FileSaver.AUTOSAVE_NAME, true);
 		}
-		if (soundPlayer != null)
-		{
-			soundPlayer.release();
-		}
 		if (isFinishing() == true)
 		{
 			Log.d("Life Cycle", "isFinishing() in StrategoActivity (onPause) returned true.");
@@ -347,6 +343,19 @@ public class StrategoActivity extends Activity
 				saveGame(FileSaver.AUTOSAVE_NAME, true);
 			}
 		}
+		if (soundPlayer != null)
+		{
+			try
+			{
+				soundPlayer.stop();
+				soundPlayer.release();
+			}
+			catch (IllegalArgumentException e)
+			{
+				
+			}
+		}
+		
 		Log.d("Life Cycle", "Stratego Activity: onStop");
 		if (isFinishing() == true)
 		{
@@ -387,7 +396,7 @@ public class StrategoActivity extends Activity
 	private void parseExtras(Intent intent)
 	{
 		keepReveals = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "1", false);
-		highlightMoves = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "2", false);
+		//highlightMoves = intent.getBooleanExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + "2", false);
 	}
 	
 	
@@ -416,14 +425,9 @@ public class StrategoActivity extends Activity
         		currentID += (count2 + 1);
         		resID = res.getIdentifier(currentID, "id", getPackageName());
         		gridButtons[count][count2] = (Button)findViewById(resID);
-        		//gridButtons[count][count2].setOnClickListener(grid_handler);
         		if (gameInProgress == false)
         		{
         			gridButtons[count][count2].setText(BLANK_MARK + "");
-        		}
-        		if (movementGridCheck[count][count2] == INVALID)
-        		{
-        			gridButtons[count][count2].setBackground(BUTTON_BACK_LAKE);
         		}
         	}
         }
@@ -494,6 +498,7 @@ public class StrategoActivity extends Activity
 		{
 			keepReveals = false;
 		}
+		/*
 		if (values.getAsInteger(DBInterface.EXTRA_BOOL_BASE_KEY + "2") > 0)
 		{
 			highlightMoves = true;
@@ -502,6 +507,7 @@ public class StrategoActivity extends Activity
 		{
 			highlightMoves = false;
 		}
+		*/
 		if (values.getAsInteger(DBInterface.IN_PLACEMENT_KEY) > 0)
 		{
 			placementInProgress = true;
@@ -587,6 +593,7 @@ public class StrategoActivity extends Activity
 		{
 			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "1", 0);
 		}
+		/*
 		if (highlightMoves == true)
 		{
 			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "2", 1);
@@ -595,6 +602,7 @@ public class StrategoActivity extends Activity
 		{
 			values.put(DBInterface.EXTRA_BOOL_BASE_KEY + "2", 0);
 		}
+		*/
 		
 		return DBInterface.insertSave(getApplicationContext(), values, THIS_GAME, overwrite);
 	}
@@ -658,7 +666,7 @@ public class StrategoActivity extends Activity
 		
 		if (placementInProgress == true)
 		{
-			divisor = placementButtons.length + 3;
+			divisor = placementButtons.length + 1;
 		}
 		else
 		{
@@ -1007,7 +1015,10 @@ public class StrategoActivity extends Activity
 							(currentPiece.isExposed() == true && keepReveals == true))
 					{
 						addMark(currentPiece, gridButtons[countVert][countHoriz]);
-						gridButtons[countVert][countHoriz].setOnTouchListener(start_drag_handler);
+						if (placementInProgress == false)
+						{
+							gridButtons[countVert][countHoriz].setOnTouchListener(start_drag_handler);
+						}
 					}
 				}
 			}

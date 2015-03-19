@@ -3,10 +3,10 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="0dp"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingTop="0dp"
     tools:context="tru.kyle.classicgameanthology.StrategoActivity"
     tools:ignore="ButtonStyle" >
     
@@ -895,10 +895,12 @@
     </LinearLayout>
 
     <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/placementHintsLayout"
-            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/placementHintsLayout"
+            android:layout_centerHorizontal="true"
+            android:gravity="right"
+            android:orientation="vertical"
             android:id="@+id/placementButtonsLayout" >
 
         <TextView
@@ -906,7 +908,8 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            android:text="Pieces:"
+            android:gravity="left"
+            android:text="Pieces: "
             android:textSize="17sp" />
 
             <Button
@@ -1004,22 +1007,25 @@
                 android:background="@drawable/button_border_normal_stratego"
                 android:text="@string/placement_flag"
                 android:textSize="17sp" />
+
     </LinearLayout>
     
     <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_above="@+id/saveGame"
-            android:layout_centerVertical="true"
+            android:gravity="left"
+            android:layout_alignParentRight="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"
             android:id="@+id/placementHintsLayout" >
 			
         	<TextView
 	            android:id="@+id/placementHintView"
 	            android:layout_width="wrap_content"
-	            android:layout_height="fill_parent"
+	            android:layout_height="wrap_content"
 	            android:layout_weight="1"
-	            android:text="Remaining:"
+	            android:gravity="right"
+	            android:text=" Remaining:"
 	            android:textSize="17sp" />
         	
             <Button
@@ -1137,6 +1143,8 @@
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="0dp"
         android:background="@drawable/button_border_normal_pente"
         android:text="@string/saveGameButtonString"
         android:textColor="#FF0000"

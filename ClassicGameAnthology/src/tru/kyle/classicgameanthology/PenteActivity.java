@@ -296,7 +296,7 @@ public class PenteActivity extends Activity
 		}
 	}
 	
-	private void setButtons(Resources res)
+	private boolean setButtons(Resources res)
 	{
 		String currentID;
         int resID;
@@ -330,7 +330,7 @@ public class PenteActivity extends Activity
         	}
         }
         
-        pruneArrays();
+        return pruneArrays();
 	}
 	
 	//Buttons need to be cut equally from all four directions.
@@ -347,7 +347,6 @@ public class PenteActivity extends Activity
 		}
 		
 		tempButtons = new Button[EFFECTIVE_VERT_LIMIT][EFFECTIVE_HORIZ_LIMIT];
-		Log.d("Pente", leftBound + ", " + rightBound + ", " + upperBound + ", " + lowerBound);
 		
 		for (int countVert = upperBound; countVert < lowerBound; countVert++)
 		{
@@ -488,6 +487,7 @@ public class PenteActivity extends Activity
 		ContentValues values = DBInterface.retrieveSave(this, filenameGame, THIS_GAME);
 		EFFECTIVE_VERT_LIMIT = values.getAsInteger(DBInterface.GRID_HEIGHT_KEY);
 		EFFECTIVE_HORIZ_LIMIT = values.getAsInteger(DBInterface.GRID_WIDTH_KEY);
+		GRID_LIMITER = (VERTICAL_LIMIT - EFFECTIVE_VERT_LIMIT) / 2;
 		if (values.getAsInteger(DBInterface.EXTRA_BOOL_BASE_KEY + "1") > 0)
 		{
 			highlightMoves = true;
