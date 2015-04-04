@@ -31,6 +31,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,6 +40,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 public abstract class BaseActivity extends Activity 
 {
@@ -113,13 +116,54 @@ public abstract class BaseActivity extends Activity
     	*/
     }
     
+    /****
+     * Set the button's background to the drawable provided.
+     * This function takes the user's API level into account and calls
+     * the appropriate functions accordingly.
+     * <p>
+     * If the button provided is null, the function will do nothing.
+     * 
+     * @param b
+     * @param d
+     ****/
+    @SuppressWarnings("deprecation")
+	@SuppressLint("NewApi") 
+    protected final void setButtonBackground(Button button, Drawable background)
+    {
+    	if (button == null)
+    	{
+    		return;
+    	}
+    	
+    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+		{
+			button.setBackground(background);
+		}
+		else
+		{
+			button.setBackgroundDrawable(background);
+		}
+    }
+    
     protected final void doUnbindService()
     {
     	this.unbindService(service_connection);
     }
     
+    /****
+     * This callback is triggered whenever any data is written to
+     * an active Bluetooth connection.
+     * 
+     * @param data : the message that was sent out.
+     ****/
     protected abstract void onWrite(String data);
     
+    /****
+     * This callback is triggered whenever an active Bluetooth connection
+     * reads any data.
+     * 
+     * @param data : the message that was received.
+     ****/
     protected abstract void onRead(String data);
     
     protected abstract void onConnectionLost();
@@ -220,10 +264,10 @@ public abstract class BaseActivity extends Activity
     
     protected void onBluetoothStateChanged(Context context, Intent intent)
     {
-    	String previousStateExtra = BluetoothAdapter.EXTRA_PREVIOUS_STATE;
+    	//String previousStateExtra = BluetoothAdapter.EXTRA_PREVIOUS_STATE;
         String stateExtra = BluetoothAdapter.EXTRA_STATE;
         int currentState = intent.getIntExtra(stateExtra, -1);
-        int prevState = intent.getIntExtra(previousStateExtra, -1);
+        //int prevState = intent.getIntExtra(previousStateExtra, -1);
         //String toasttext = "";
         switch(currentState)
         {	

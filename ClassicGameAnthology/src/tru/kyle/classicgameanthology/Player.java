@@ -21,10 +21,11 @@ along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses
 import tru.kyle.databases.DBInterface;
 import android.content.ContentValues;
 
-//This class has been largely deprecated and is not in use.
+
 
 public class Player 
 {
+	
 	String playerName;
 	int[] winCount;
 	int[] matchCount;
@@ -37,8 +38,8 @@ public class Player
 	public Player(String newName)
 	{
 		playerName = newName;
-		winCount = new int[FileSaver.Game.values().length];
-		matchCount = new int[FileSaver.Game.values().length];
+		winCount = new int[DBInterface.Game.values().length];
+		matchCount = new int[DBInterface.Game.values().length];
 		for (int count = 0; count < winCount.length; count++)
 		{
 			winCount[count] = 0;
@@ -57,9 +58,9 @@ public class Player
 	{
 		playerName = values.getAsString(DBInterface.PLAYER_NAME_KEY);
 		winCount = DBInterface.stringToArray(values.getAsString(DBInterface.PLAYER_WINS_KEY), 
-				FileSaver.Game.values().length);
+				DBInterface.Game.values().length);
 		matchCount = DBInterface.stringToArray(values.getAsString(DBInterface.PLAYER_MATCHES_KEY), 
-				FileSaver.Game.values().length);
+				DBInterface.Game.values().length);
 	}
 	
 	public String getName()
@@ -100,7 +101,7 @@ public class Player
 	public int getGlobalWins()
 	{
 		int result = 0;
-		int limit = FileSaver.Game.values().length;
+		int limit = DBInterface.Game.values().length;
 		for (int count = 0; count < limit; count++)
 		{
 			result += winCount[count];
@@ -111,7 +112,7 @@ public class Player
 	public int getGlobalMatches()
 	{
 		int result = 0;
-		int limit = FileSaver.Game.values().length;
+		int limit = DBInterface.Game.values().length;
 		for (int count = 0; count < limit; count++)
 		{
 			result += matchCount[count];
@@ -122,7 +123,7 @@ public class Player
 	public String getGameStandings(int index)
 	{
 		String result = "";
-		result = FileSaver.Game.values()[index].toString() + "\n";
+		result = DBInterface.Game.values()[index].toString() + "\n";
 		result += "Wins: " + winCount[index] + "\n";
 		result += "Matches: " + matchCount[index] + "\n";
 		return result;
@@ -140,11 +141,12 @@ public class Player
 	{
 		String result = "";
 		result = getName() + "\n";
-		int limit = FileSaver.Game.values().length;
+		int limit = DBInterface.Game.values().length;
 		for (int count = 0; count < limit; count++)
 		{
 			result += getGameFileStandings(count);
 		}
 		return result;
 	}
+	
 }

@@ -18,14 +18,13 @@ You should have received a copy of the GNU General Public License
 along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import tru.kyle.classicgameanthology.FileSaver.CaptureType;
-import tru.kyle.classicgameanthology.FileSaver.Game;
-import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
+import tru.kyle.databases.DBInterface.CaptureType;
+import tru.kyle.databases.DBInterface.Game;
+import tru.kyle.databases.DBInterface.GameByLayout;
 import tru.kyle.databases.DBInterface;
 
 import tru.kyle.mylists.*;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -111,8 +110,6 @@ public class PenteActivity extends BaseActivity
 	MediaPlayer soundPlayer;
 	RelativeLayout mainLayout;
 	
-	Player playerOne;
-	Player playerTwo;
 	String playerOneName;
 	String playerTwoName;
 	
@@ -170,7 +167,7 @@ public class PenteActivity extends BaseActivity
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
         if (filenameGame == null)
         {
-        	filenameGame = FileSaver.AUTOSAVE_NAME;
+        	filenameGame = DBInterface.AUTOSAVE_NAME;
         }
     	filenameStandings = getString(R.string.filenameStandings);
     	filenameNames = getString(R.string.filenameNames);
@@ -582,8 +579,8 @@ public class PenteActivity extends BaseActivity
 	
 	public void useGuestNames()
 	{
-		playerOne = new Player("Guest One");
-		playerTwo = new Player("Guest Two");
+		playerOneName = "Guest One";
+		playerTwoName = "Guest Two";
 		usingGuestNames = true;
 		String temp = "One or more players could not be found. Default names are being used.";
 		temp += "\nThis game cannot be saved.";
@@ -990,10 +987,10 @@ public class PenteActivity extends BaseActivity
     	{
     		if (previousMove != null && previousMove.getBackground() != BUTTON_BACK_CAPTURE)
         	{
-        		previousMove.setBackground(BUTTON_BACK_NORMAL);
+        		setButtonBackground(previousMove, BUTTON_BACK_NORMAL);
         	}
     		previousMove = B;
-    		previousMove.setBackground(BUTTON_BACK_GLOW);
+    		setButtonBackground(previousMove, BUTTON_BACK_GLOW);
     	}
     }
      
@@ -1001,7 +998,7 @@ public class PenteActivity extends BaseActivity
     {
     	if (highlightMoves == true)
     	{
-    		captured.setBackground(BUTTON_BACK_CAPTURE);
+    		setButtonBackground(captured, BUTTON_BACK_CAPTURE);
     	}
     }
     
@@ -1015,7 +1012,7 @@ public class PenteActivity extends BaseActivity
     			temp = lastCaptures.dequeue();
     			if (temp != null)
     			{
-    				temp.setBackground(BUTTON_BACK_NORMAL);
+    				setButtonBackground(temp, BUTTON_BACK_NORMAL);
     			}
     		}
     	}
@@ -1032,7 +1029,7 @@ public class PenteActivity extends BaseActivity
     			temp = lastLines.dequeue();
     			if (temp != null)
     			{
-    				temp.setBackground(BUTTON_BACK_WARNING);
+    				setButtonBackground(temp, BUTTON_BACK_WARNING);
     			}
     			lastLines.enqueue(temp);
     		}
@@ -1049,7 +1046,7 @@ public class PenteActivity extends BaseActivity
     			temp = lastLines.dequeue();
     			if (temp != null)
     			{
-    				temp.setBackground(BUTTON_BACK_NORMAL);
+    				setButtonBackground(temp, BUTTON_BACK_NORMAL);
     			}
     		}
     	}
@@ -1282,7 +1279,7 @@ public class PenteActivity extends BaseActivity
 		//Release unneeded resources here, save data, etc.
 		if (gameInProgress == true && usingGuestNames == false && endOfMatch == false)
 		{
-			saveGame(FileSaver.AUTOSAVE_NAME, true);
+			saveGame(DBInterface.AUTOSAVE_NAME, true);
 		}
 		if (soundPlayer != null)
 		{

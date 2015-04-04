@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import tru.kyle.classicgameanthology.FileSaver.Game;
-import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
+import tru.kyle.databases.DBInterface.Game;
+import tru.kyle.databases.DBInterface.GameByLayout;
 import tru.kyle.databases.DBInterface;
 import tru.kyle.mylists.MyQueue;
 
@@ -93,8 +93,6 @@ public class ConnectFourActivity extends BaseActivity
 	MediaPlayer soundPlayer;
 	RelativeLayout mainLayout;
 	
-	Player playerOne;
-	Player playerTwo;
 	String playerOneName;
 	String playerTwoName;
 	
@@ -145,7 +143,7 @@ public class ConnectFourActivity extends BaseActivity
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
         if (filenameGame == null)
         {
-        	filenameGame = FileSaver.AUTOSAVE_NAME;
+        	filenameGame = DBInterface.AUTOSAVE_NAME;
         }
     	filenameStandings = getString(R.string.filenameStandings);
     	filenameNames = getString(R.string.filenameNames);
@@ -496,8 +494,8 @@ public class ConnectFourActivity extends BaseActivity
 	
 	public void useGuestNames()
 	{
-		playerOne = new Player("Guest One");
-		playerTwo = new Player("Guest Two");
+		playerOneName = "Guest One";
+		playerTwoName = "Guest Two";
 		usingGuestNames = true;
 		//Create a dialog that warns the user of how one or more players could not be found.
 		//Inform them that default names are being used and that the game cannot be saved.
@@ -790,10 +788,10 @@ public class ConnectFourActivity extends BaseActivity
     	{
     		if (previousMove != null)
         	{
-        		previousMove.setBackground(BUTTON_BACK_NORMAL);
+    			setButtonBackground(previousMove, BUTTON_BACK_NORMAL);
         	}
     		previousMove = B;
-    		previousMove.setBackground(BUTTON_BACK_GLOW);
+    		setButtonBackground(previousMove, BUTTON_BACK_GLOW);
     	}
     }
     
@@ -808,7 +806,7 @@ public class ConnectFourActivity extends BaseActivity
     			temp = lastLines.dequeue();
     			if (temp != null)
     			{
-    				temp.setBackground(BUTTON_BACK_WARNING);
+    				setButtonBackground(temp, BUTTON_BACK_WARNING);
     			}
     			lastLines.enqueue(temp);
     		}
@@ -825,7 +823,7 @@ public class ConnectFourActivity extends BaseActivity
     			temp = lastLines.dequeue();
     			if (temp != null)
     			{
-    				temp.setBackground(BUTTON_BACK_NORMAL);
+    				setButtonBackground(temp, BUTTON_BACK_NORMAL);
     			}
     		}
     	}
@@ -1064,7 +1062,7 @@ public class ConnectFourActivity extends BaseActivity
 		//Release unneeded resources here, save data, etc.
 		if (gameInProgress == true && usingGuestNames == false && endOfMatch == false)
 		{
-			saveGame(FileSaver.AUTOSAVE_NAME, true);
+			saveGame(DBInterface.AUTOSAVE_NAME, true);
 		}
 		if (soundPlayer != null)
 		{

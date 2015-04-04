@@ -292,7 +292,7 @@ public class MainMenuActivity extends BaseActivity
 	
 	public void determineExtras()
     {
-        String gameName = getClassName(FileSaver.Game.values()[currentGame]);
+        String gameName = getClassName(DBInterface.Game.values()[currentGame]);
         //Class<?> gameClass;
         Class<?> gameClass;
         playerOptions = null;
@@ -401,11 +401,11 @@ public class MainMenuActivity extends BaseActivity
     {
     	List<String> spinnerArray = new ArrayList<String>();
         int tempCount = 0;
-        int limit = FileSaver.Game.values().length;
+        int limit = DBInterface.Game.values().length;
         
         for (tempCount = 0; tempCount < limit; tempCount++)
 		{
-        	spinnerArray.add(FileSaver.Game.values()[tempCount].toString());
+        	spinnerArray.add(DBInterface.Game.values()[tempCount].toString());
 		}
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, bigSpinnerItemID, spinnerArray);
 	    adapter.setDropDownViewResource(bigDropDownItemID);
@@ -443,7 +443,7 @@ public class MainMenuActivity extends BaseActivity
 	
 	public void addSaveFilesToSpinner()
     {
-		currentFiles = DBInterface.getNames(getApplicationContext(), FileSaver.Game.values()[currentGame]);
+		currentFiles = DBInterface.getNames(getApplicationContext(), DBInterface.Game.values()[currentGame]);
     	List<String> spinnerArray = new ArrayList<String>();
         int tempCount = 0;
         if (currentFiles == null)
@@ -562,7 +562,7 @@ public class MainMenuActivity extends BaseActivity
 			{
 				activityShift = true;
 				
-				String className = getClassName(FileSaver.Game.values()[currentGame]);
+				String className = getClassName(DBInterface.Game.values()[currentGame]);
 				Intent intent;
 				try 
 				{
@@ -644,7 +644,7 @@ public class MainMenuActivity extends BaseActivity
 			bluetoothBuilder.setCancelable(true);
 			if (bluetooth.isHost() == true && chosenDevice != null)
 			{
-				bluetoothBuilder.setPositiveButton("Launch " + FileSaver.Game.values()[currentGame].toString(), 
+				bluetoothBuilder.setPositiveButton("Launch " + DBInterface.Game.values()[currentGame].toString(), 
 						bluetooth_dialog_listener);
 			}
 			bluetoothBuilder.setNeutralButton("Find Opponents", bluetooth_dialog_listener);
@@ -721,7 +721,7 @@ public class MainMenuActivity extends BaseActivity
 			if (bluetooth.isHost() == true)
 			{
 				Log.d("Main Menu", "Launching as host");
-				className = getClassName(FileSaver.Game.values()[currentGame]);
+				className = getClassName(DBInterface.Game.values()[currentGame]);
 				intent = new Intent(MainMenuActivity.this, Class.forName(className));
 				String extraInfo = "";
 				intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1", 
@@ -762,7 +762,7 @@ public class MainMenuActivity extends BaseActivity
 			else
 			{
 				Log.d("Main Menu", "Launching as client");
-				className = getClassName(FileSaver.Game.values()[gameOptionsFromHost[0]]);
+				className = getClassName(DBInterface.Game.values()[gameOptionsFromHost[0]]);
 				determineExtras();
 				intent = new Intent(MainMenuActivity.this, Class.forName(className));
 				
@@ -843,11 +843,11 @@ public class MainMenuActivity extends BaseActivity
 		return result;
 	}
 	
-	private String getClassName(FileSaver.Game game)
+	private String getClassName(DBInterface.Game game)
 	{
 		String result = getPackageName() + ".";
-		result += FileSaver.Game.values()[currentGame].toString();
-		result += FileSaver.ACTIVITY_SUFFIX;
+		result += DBInterface.Game.values()[currentGame].toString();
+		result += DBInterface.ACTIVITY_SUFFIX;
 		return result;
 	}
 	
@@ -857,7 +857,7 @@ public class MainMenuActivity extends BaseActivity
 		public void onClick(View v) 
 		{
 			activityShift = true;
-			String className = getClassName(FileSaver.Game.values()[currentGame]);
+			String className = getClassName(DBInterface.Game.values()[currentGame]);
 			Intent intent;
 			if (filename != null)
 			{
@@ -914,10 +914,9 @@ public class MainMenuActivity extends BaseActivity
 		{
 			if (filename != null)
 			{
-				FileSaver.deleteSave(getApplicationContext(), currentFiles[currentSaveFile], 
-						FileSaver.SaveType.GAMES, FileSaver.Game.values()[currentGame]);
+				DBInterface.deleteSave(getApplicationContext(), currentFiles[currentSaveFile], 
+						DBInterface.Game.values()[currentGame]);
 				currentFiles[currentSaveFile] = null;
-				FileSaver.writeFilenames(getApplicationContext(), currentFiles, FileSaver.Game.values()[currentGame]);
 				addSaveFilesToSpinner();
 			}
 			deleteSaveDialog.dismiss();

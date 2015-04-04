@@ -2,12 +2,11 @@ package tru.kyle.classicgameanthology;
 
 import java.util.ArrayList;
 
-import tru.kyle.classicgameanthology.FileSaver.Game;
-import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
+import tru.kyle.databases.DBInterface.Game;
+import tru.kyle.databases.DBInterface.GameByLayout;
 import tru.kyle.databases.DBInterface;
 import tru.kyle.mylists.MyQueue;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ContentValues;
@@ -110,8 +109,6 @@ public class StrategoActivity extends BaseActivity
 	MediaPlayer soundPlayer;
 	RelativeLayout mainLayout;
 	
-	Player playerOne;
-	Player playerTwo;
 	String playerOneName;
 	String playerTwoName;
 	
@@ -215,7 +212,7 @@ public class StrategoActivity extends BaseActivity
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
         if (filenameGame == null)
         {
-        	filenameGame = FileSaver.AUTOSAVE_NAME;
+        	filenameGame = DBInterface.AUTOSAVE_NAME;
         }
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
@@ -346,7 +343,7 @@ public class StrategoActivity extends BaseActivity
 		//Release unneeded resources here, save data, etc.
 		if (usingGuestNames == false && endOfMatch == false)
 		{
-			saveGame(FileSaver.AUTOSAVE_NAME, true);
+			saveGame(DBInterface.AUTOSAVE_NAME, true);
 		}
 		if (isFinishing() == true)
 		{
@@ -370,7 +367,7 @@ public class StrategoActivity extends BaseActivity
 			swapTurn();
 			if (usingGuestNames == false && endOfMatch == false)
 			{
-				saveGame(FileSaver.AUTOSAVE_NAME, true);
+				saveGame(DBInterface.AUTOSAVE_NAME, true);
 			}
 		}
 		if (soundPlayer != null)
@@ -725,11 +722,11 @@ public class StrategoActivity extends BaseActivity
 				gridButtons[count][count2].setOnTouchListener(null);
 				if (movementGridCheck[count][count2] == INVALID)
 				{
-					gridButtons[count][count2].setBackground(BUTTON_BACK_LAKE);
+					setButtonBackground(gridButtons[count][count2], BUTTON_BACK_LAKE);
 				}
 				else
 				{
-					gridButtons[count][count2].setBackground(BUTTON_BACK_EMPTY);
+					setButtonBackground(gridButtons[count][count2], BUTTON_BACK_EMPTY);
 				}
 				gridPieces[count][count2] = null;
 			}
@@ -740,8 +737,8 @@ public class StrategoActivity extends BaseActivity
 	
 	public void useGuestNames()
 	{
-		playerOne = new Player("Guest One");
-		playerTwo = new Player("Guest Two");
+		playerOneName = "Guest One";
+		playerTwoName = "Guest Two";
 		usingGuestNames = true;
 		String temp = "One or more players could not be found. Default names are being used.";
 		temp += "\nThis game cannot be saved.";
@@ -756,7 +753,7 @@ public class StrategoActivity extends BaseActivity
 			{
 				if (movementGridCheck[vertIndex][horizIndex] == INVALID)
 				{
-					gridButtons[vertIndex][horizIndex].setBackground(BUTTON_BACK_LAKE);
+					setButtonBackground(gridButtons[vertIndex][horizIndex], BUTTON_BACK_LAKE);
 				}
 			}
 		}
@@ -785,7 +782,7 @@ public class StrategoActivity extends BaseActivity
 			if (player == 1)
 			{
 				playerOneAvailablePieces[count] = pieceLimits[count];
-				placementButtons[count].setBackground(BUTTON_BACK_P_1);
+				setButtonBackground(placementButtons[count], BUTTON_BACK_P_1);
 				placementButtons[count].setTextColor(playerOneColour);
 				activePlayerDisplay.setText(playerOneName + ", place your pieces.");
 				activePlayerDisplay.setTextColor(playerOneColour);
@@ -793,7 +790,7 @@ public class StrategoActivity extends BaseActivity
 			else
 			{
 				playerTwoAvailablePieces[count] = pieceLimits[count];
-				placementButtons[count].setBackground(BUTTON_BACK_P_2);
+				setButtonBackground(placementButtons[count], BUTTON_BACK_P_2);
 				placementButtons[count].setTextColor(playerTwoColour);
 				activePlayerDisplay.setText(playerTwoName + ", place your pieces.");
 				activePlayerDisplay.setTextColor(playerTwoColour);
@@ -1031,7 +1028,7 @@ public class StrategoActivity extends BaseActivity
 		if (piece == null)
 		{
 			location.setText(BLANK_MARK + "");
-			location.setBackground(BUTTON_BACK_EMPTY);
+			setButtonBackground(location, BUTTON_BACK_EMPTY);
 		}
 		else
 		{
@@ -1047,12 +1044,12 @@ public class StrategoActivity extends BaseActivity
 			if (piece.getOwner() == 1)
 			{
 				location.setTextColor(playerOneColour);
-				location.setBackground(BUTTON_BACK_P_1);
+				setButtonBackground(location, BUTTON_BACK_P_1);
 			}
 			else
 			{
 				location.setTextColor(playerTwoColour);
-				location.setBackground(BUTTON_BACK_P_2);
+				setButtonBackground(location, BUTTON_BACK_P_2);
 			}
 		}
 	}
@@ -1232,15 +1229,15 @@ public class StrategoActivity extends BaseActivity
 			availableLocationOldBackgrounds[count] = availableLocationButtons[count].getBackground();
 			if (availableLocationOldBackgrounds[count] == BUTTON_BACK_P_1)
 			{
-				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_P_1);
+				setButtonBackground(availableLocationButtons[count], BUTTON_BACK_MOVABLE_P_1);
 			}
 			else if (availableLocationOldBackgrounds[count] == BUTTON_BACK_P_2)
 			{
-				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_P_2);
+				setButtonBackground(availableLocationButtons[count], BUTTON_BACK_MOVABLE_P_2);
 			}
 			else
 			{
-				availableLocationButtons[count].setBackground(BUTTON_BACK_MOVABLE_EMPTY);
+				setButtonBackground(availableLocationButtons[count], BUTTON_BACK_MOVABLE_EMPTY);
 			}
 		}
 	}
@@ -1253,7 +1250,7 @@ public class StrategoActivity extends BaseActivity
 			{
 				if (availableLocationButtons[count] != null)
 				{
-					availableLocationButtons[count].setBackground(
+					setButtonBackground(availableLocationButtons[count], 
 							availableLocationOldBackgrounds[count]);
 				}
 			}

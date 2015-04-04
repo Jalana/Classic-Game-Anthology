@@ -21,7 +21,7 @@ along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses
 import java.util.ArrayList;
 import java.util.List;
 
-import tru.kyle.classicgameanthology.FileSaver.Game;
+import tru.kyle.databases.DBInterface.Game;
 import tru.kyle.databases.DBInterface;
 
 import android.app.Activity;
@@ -304,8 +304,8 @@ public class PlayerManagementActivity extends Activity
 			currentPlayerView.setText(" " + players[currentPlayer].getName() + " ");
 			globalWins.setText(" Total wins: " + playerGlobalWins + " ");
 			globalMatches.setText(" Total matches: " + playerGlobalMatches + " ");
-			localWins.setText(" " + FileSaver.Game.values()[currentGame].toString() + " wins: " + playerLocalWins + " ");
-			localMatches.setText(" " + FileSaver.Game.values()[currentGame].toString() + " matches: " + playerLocalMatches + " ");
+			localWins.setText(" " + DBInterface.Game.values()[currentGame].toString() + " wins: " + playerLocalWins + " ");
+			localMatches.setText(" " + DBInterface.Game.values()[currentGame].toString() + " matches: " + playerLocalMatches + " ");
 		}
 	}
 	

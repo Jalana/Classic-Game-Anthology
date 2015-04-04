@@ -82,6 +82,11 @@ public class BluetoothService extends Service
 		
 	}
 	
+	/****
+	 * 
+	 * @return one of STATE_NONE, STATE_LISTENING, 
+	 * STATE_CONNECTING, or STATE_CONNECTED.
+	 ****/
 	public synchronized int getState()
 	{
 		return state;
@@ -92,11 +97,22 @@ public class BluetoothService extends Service
 	//	return otherDevice;
 	//}
 	
+	/****
+	 * This function checks to see if the user is considered the host in 
+	 * the active connection. The result is meaningless if no connection is active.
+	 * 
+	 * @return true to indicate the host.
+	 ****/
 	public synchronized boolean isHost()
 	{
 		return isHost;
 	}
 	
+	/****
+	 * This function simply toggles the host. It is primarily intended for use
+	 * if the two devices involved in a connection are alternating hosting status
+	 * for any reason, such as if they are taking turns in some process.
+	 ****/
 	public synchronized void toggleHost()
 	{
 		isHost = !isHost;
@@ -113,6 +129,11 @@ public class BluetoothService extends Service
 		handler = h;
 	}
 	
+	/****
+	 * This function opens an active socket and waits for another device to 
+	 * initiate a connection. There is no duration limit, and calling this
+	 * function will interrupt any ongoing connections.
+	 ****/
 	public void startListening()
 	{
 		if (launchConnection != null) 
@@ -136,6 +157,12 @@ public class BluetoothService extends Service
 		setState(STATE_LISTENING);
 	}
 	
+	/****
+	 * Attempt to connect to another device. If any connections are already ongoing,
+	 * they will be terminated first.
+	 * 
+	 * @param device : the device that the user is trying to connect to.
+	 ****/
 	public synchronized void connect(BluetoothDevice device) 
 	{
 		// Cancel any thread attempting to make a connection
@@ -160,6 +187,12 @@ public class BluetoothService extends Service
 		setState(STATE_CONNECTING);
 	}
 	
+	/****
+	 * Send data to the connected device. If no connection is active,
+	 * this function will do nothing.
+	 * 
+	 * @param message : the data to be transmitted.
+	 ****/
 	public void write(String message)
 	{
 		byte[] bytes = message.getBytes();
@@ -182,12 +215,15 @@ public class BluetoothService extends Service
 	
 	
 	
-	public void getPairedDevices()
-	{
-		
-	}
-	
-	public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) 
+	/****
+	 * This function is called when a successful connection is made.
+	 * It sends a message with the key MESSAGE_DEVICE_NAME, and that message
+	 * includes the BluetoothDevice as data under the key DEVICE_OBJECT.
+	 * 
+	 * @param socket : used to manage the connection
+	 * @param device : the device that was connected to.
+	 ****/
+	private synchronized void connected(BluetoothSocket socket, BluetoothDevice device) 
 	{
 		stopThreads();
 		/*
@@ -214,16 +250,18 @@ public class BluetoothService extends Service
 		//otherDevice = device;
 		connectionThread = new BluetoothIOThread(socket);
 		connectionThread.start();
+		setState(STATE_CONNECTED);
 		
 		Message msg = handler.obtainMessage(BluetoothService.MESSAGE_DEVICE_NAME);
 		Bundle bundle = new Bundle();
 		bundle.putParcelable(BluetoothService.DEVICE_OBJECT, device);
 		msg.setData(bundle);
 		handler.sendMessage(msg);
-
-		setState(STATE_CONNECTED);
 	}
 	
+	/****
+	 * Stop all connections immediately.
+	 ****/
 	public synchronized void stopThreads()
 	{
 		if (launchConnection != null) 

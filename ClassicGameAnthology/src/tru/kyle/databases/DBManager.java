@@ -20,8 +20,8 @@ along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses
 
 import java.util.Arrays;
 
-import tru.kyle.classicgameanthology.FileSaver;
-import tru.kyle.classicgameanthology.FileSaver.Game;
+import tru.kyle.databases.DBInterface.Game;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -49,11 +49,11 @@ public class DBManager
 	protected static final String BASE_DROP_STATEMENT = "DROP TABLE IF EXISTS ";
 	
 	protected static final String[] DATABASE_NAMES = {PLAYER_TABLE + DB_SUFFIX,
-		FileSaver.Game.ConnectFour.toString() + DB_SUFFIX,
-		FileSaver.Game.Pente.toString() + DB_SUFFIX,
-		FileSaver.Game.Reversi.toString() + DB_SUFFIX,
-		FileSaver.Game.Mastermind.toString() + DB_SUFFIX,
-		FileSaver.Game.Stratego.toString() + DB_SUFFIX
+		DBInterface.Game.ConnectFour.toString() + DB_SUFFIX,
+		DBInterface.Game.Pente.toString() + DB_SUFFIX,
+		DBInterface.Game.Reversi.toString() + DB_SUFFIX,
+		DBInterface.Game.Mastermind.toString() + DB_SUFFIX,
+		DBInterface.Game.Stratego.toString() + DB_SUFFIX
 	};
     
 	protected static final String CREATE_PLAYERS_TABLE = 
@@ -65,7 +65,7 @@ public class DBManager
 			")";
 	
     protected static final String CREATE_CONNECT_FOUR_TABLE = 
-    	BASE_CREATE_STATEMENT + FileSaver.Game.ConnectFour.toString() + "(" +
+    	BASE_CREATE_STATEMENT + DBInterface.Game.ConnectFour.toString() + "(" +
     		//" _id INTEGER primary key autoincrement, " +
     		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
     		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
@@ -79,7 +79,7 @@ public class DBManager
     		")";
     
     protected static final String CREATE_PENTE_TABLE = 
-    	BASE_CREATE_STATEMENT + FileSaver.Game.Pente.toString() + "(" + 
+    	BASE_CREATE_STATEMENT + DBInterface.Game.Pente.toString() + "(" + 
     		//" _id INTEGER primary key autoincrement, " +
     		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
     		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
@@ -96,7 +96,7 @@ public class DBManager
     		")";
     
     protected static final String CREATE_REVERSI_TABLE = 
-    	BASE_CREATE_STATEMENT + FileSaver.Game.Reversi.toString() + "(" + 
+    	BASE_CREATE_STATEMENT + DBInterface.Game.Reversi.toString() + "(" + 
     		//" _id INTEGER primary key autoincrement, " +
     		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
     		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
@@ -110,7 +110,7 @@ public class DBManager
     		")";
     
     protected static final String CREATE_MASTERMIND_TABLE = 
-        	BASE_CREATE_STATEMENT + FileSaver.Game.Mastermind.toString() + "(" + 
+        	BASE_CREATE_STATEMENT + DBInterface.Game.Mastermind.toString() + "(" + 
         		//" _id INTEGER primary key autoincrement, " +
         		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
         		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
@@ -129,7 +129,7 @@ public class DBManager
         		")";
     
     protected static final String CREATE_STRATEGO_TABLE = 
-        	BASE_CREATE_STATEMENT + FileSaver.Game.Stratego.toString() + "(" + 
+        	BASE_CREATE_STATEMENT + DBInterface.Game.Stratego.toString() + "(" + 
         		//" _id INTEGER primary key autoincrement, " +
         		DBInterface.GAME_NAME_KEY + " TEXT primary key not null, " +
         		DBInterface.GRID_WIDTH_KEY + " INTEGER not null, " +
@@ -217,7 +217,7 @@ public class DBManager
 			
 			openDB(context, null);
 			String temp = "";
-			int limit = FileSaver.Game.values().length;
+			int limit = DBInterface.Game.values().length;
 			for (int count = 1; count < limit; count++)
 			{
 				temp += "0";
@@ -274,11 +274,11 @@ public class DBManager
 		for (int count = 0; count < limit; count++)
 		{
 			values = new ContentValues();
-			matches = DBInterface.stringToArray(cursor.getString(matchesColumn), FileSaver.Game.values().length);
+			matches = DBInterface.stringToArray(cursor.getString(matchesColumn), DBInterface.Game.values().length);
 			matches[game.ordinal()] += 1;
 			if (winners != null && Arrays.asList(winners).contains(cursor.getString(nameColumn)))
 			{
-				wins = DBInterface.stringToArray(cursor.getString(winsColumn), FileSaver.Game.values().length);
+				wins = DBInterface.stringToArray(cursor.getString(winsColumn), DBInterface.Game.values().length);
 				wins[game.ordinal()] += 1;
 				values.put(DBInterface.PLAYER_WINS_KEY, DBInterface.arrayToString(wins));
 			}
@@ -497,7 +497,7 @@ public class DBManager
 		{
 			ContentValues values = new ContentValues();
 			String zeroScores = "";
-			int limit = FileSaver.Game.values().length;
+			int limit = DBInterface.Game.values().length;
 			for (int count = 1; count < limit; count++)
 			{
 				zeroScores += "0";

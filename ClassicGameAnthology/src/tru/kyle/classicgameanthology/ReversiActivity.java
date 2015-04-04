@@ -18,15 +18,14 @@ You should have received a copy of the GNU General Public License
 along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import tru.kyle.classicgameanthology.FileSaver.CaptureType;
-import tru.kyle.classicgameanthology.FileSaver.Game;
-import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
+import tru.kyle.databases.DBInterface.CaptureType;
+import tru.kyle.databases.DBInterface.Game;
+import tru.kyle.databases.DBInterface.GameByLayout;
 import tru.kyle.databases.DBInterface;
 
 import tru.kyle.mylists.*;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -107,8 +106,6 @@ public class ReversiActivity extends BaseActivity
 	MediaPlayer soundPlayer;
 	RelativeLayout mainLayout;
 	
-	Player playerOne;
-	Player playerTwo;
 	String playerOneName;
 	String playerTwoName;
 	
@@ -165,7 +162,7 @@ public class ReversiActivity extends BaseActivity
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
         if (filenameGame == null)
         {
-        	filenameGame = FileSaver.AUTOSAVE_NAME;
+        	filenameGame = DBInterface.AUTOSAVE_NAME;
         }
     	filenameStandings = getString(R.string.filenameStandings);
     	filenameNames = getString(R.string.filenameNames);
@@ -528,8 +525,8 @@ public class ReversiActivity extends BaseActivity
 	
 	public void useGuestNames()
 	{
-		playerOne = new Player("Guest One");
-		playerTwo = new Player("Guest Two");
+		playerOneName = "Guest One";
+		playerTwoName = "Guest Two";
 		usingGuestNames = true;
 		//Create a dialog that warns the user of how one or more players could not be found.
 		//Inform them that default names are being used and that the game cannot be saved.
@@ -908,10 +905,10 @@ public class ReversiActivity extends BaseActivity
     	{
     		if (previousMove != null && previousMove.getBackground() != BUTTON_BACK_CAPTURE)
         	{
-        		previousMove.setBackground(BUTTON_BACK_NORMAL);
+        		setButtonBackground(previousMove, BUTTON_BACK_NORMAL);
         	}
     		previousMove = B;
-    		previousMove.setBackground(BUTTON_BACK_GLOW);
+    		setButtonBackground(previousMove, BUTTON_BACK_GLOW);
     	}
     	return B;
     }
@@ -920,7 +917,7 @@ public class ReversiActivity extends BaseActivity
     {
     	if (highlightMoves == true)
     	{
-    		captured.setBackground(BUTTON_BACK_CAPTURE);
+    		setButtonBackground(captured, BUTTON_BACK_CAPTURE);
     	}
     	return captured;
     }
@@ -929,7 +926,7 @@ public class ReversiActivity extends BaseActivity
     {
     	if (highlightMoves == true)
     	{
-    		failure.setBackground(BUTTON_BACK_FAILURE);
+    		setButtonBackground(failure, BUTTON_BACK_FAILURE);
     	}
     	return failure;
     }
@@ -938,7 +935,7 @@ public class ReversiActivity extends BaseActivity
     {
     	if (highlightMoves == true)
     	{
-    		B.setBackground(BUTTON_BACK_NORMAL);
+    		setButtonBackground(B, BUTTON_BACK_NORMAL);
     	}
     	return B;
     }
@@ -1206,7 +1203,7 @@ public class ReversiActivity extends BaseActivity
 		//Release unneeded resources here, save data, etc.
 		if (gameInProgress == true && usingGuestNames == false && endOfMatch == false)
 		{
-			saveGame(FileSaver.AUTOSAVE_NAME, true);
+			saveGame(DBInterface.AUTOSAVE_NAME, true);
 		}
 		if (soundPlayer != null)
 		{

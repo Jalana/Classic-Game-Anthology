@@ -22,13 +22,21 @@ import java.util.ArrayList;
 
 import android.content.ContentValues;
 import android.content.Context;
-import tru.kyle.classicgameanthology.FileSaver.Game;
 
 public class DBInterface 
 {
 	/* WARNING: Cursors may be case-sensitive. Keys cannot have upper-case letters. */
 	
 	private final static String LOGTAG = "DBInterface";
+	
+	public static enum Game {ConnectFour, Pente, Reversi, Mastermind, Stratego};
+	public static enum GameByLayout {connect_four, pente, reversi, mastermind, stratego};
+	public static enum CaptureType {NONE, REMOVE, CHANGE};
+	public static enum SaveType {PLAYERS, GAMES, DATA};
+	public final static String LAYOUT_PREFIX = "activity_";
+	public final static String ACTIVITY_SUFFIX = "Activity";
+	public final static String AUTOSAVE_NAME = "autosave";
+	public static final int MIN_PLAYERS = 2;
 	
 	//These are keys to be used in storing the data for save games.
 	//Any keys ending in an underscore are base keys, requiring number suffixes to indicate player number, etc.

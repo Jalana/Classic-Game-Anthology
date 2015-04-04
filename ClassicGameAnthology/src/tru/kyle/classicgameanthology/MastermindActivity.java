@@ -20,11 +20,11 @@ along with the Classic Game Anthology.  If not, see <http://www.gnu.org/licenses
 
 import java.util.Random;
 
-import tru.kyle.classicgameanthology.FileSaver.*;
+import tru.kyle.databases.DBInterface.Game;
+import tru.kyle.databases.DBInterface.GameByLayout;
 import tru.kyle.databases.DBInterface;
 import tru.kyle.mylists.MyQueue;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ContentValues;
@@ -41,7 +41,6 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -71,7 +70,7 @@ Retrieve the extra options: how?
 -Parsing the extra options should be split into another function.
 */
 
-public class MastermindActivity extends Activity 
+public class MastermindActivity extends BaseActivity 
 {
 	public static final Integer[] PLAYERS = {1};
 	
@@ -135,8 +134,6 @@ public class MastermindActivity extends Activity
 	MediaPlayer soundPlayer;
 	RelativeLayout mainLayout;
 	
-	Player playerOne;
-	Player playerTwo;
 	String playerOneName;
 	String playerTwoName;
 	
@@ -244,7 +241,7 @@ public class MastermindActivity extends Activity
         filenameGame = intent.getStringExtra(MainMenuActivity.GAME_FILENAME_KEY);
         if (filenameGame == null)
         {
-        	filenameGame = FileSaver.AUTOSAVE_NAME;
+        	filenameGame = DBInterface.AUTOSAVE_NAME;
         }
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
@@ -385,7 +382,7 @@ public class MastermindActivity extends Activity
 		super.onPause();
 		if (gameInProgress == true && usingGuestNames == false && endOfMatch == false)
 		{
-			saveGame(FileSaver.AUTOSAVE_NAME, true);
+			saveGame(DBInterface.AUTOSAVE_NAME, true);
 		}
 		if (soundPlayer != null)
 		{
@@ -565,7 +562,7 @@ public class MastermindActivity extends Activity
         		else
         		{
         			//buttons[countVert][countHoriz].setOnDragListener(grid_handler);
-        			buttons[countVert][countHoriz].setBackground(UNPLACED_PEG);
+        			setButtonBackground(buttons[countVert][countHoriz], UNPLACED_PEG);
         		}
         		//Given how the game plays, should listeners only be registered when the appropriate row comes up?
         	}
@@ -641,7 +638,7 @@ public class MastermindActivity extends Activity
         		else
         		{
         			//Note that the markers do not require listeners.
-        			markers[countVert][countHoriz].setBackground(UNPLACED_MARKER);
+        			setButtonBackground(markers[countVert][countHoriz], UNPLACED_MARKER);
         		}
         	}
         }
@@ -800,8 +797,8 @@ public class MastermindActivity extends Activity
 		{
 			for (int count2 = 0; count2 < buttons[count].length; count2++)
 			{
-				buttons[count][count2].setBackground(UNPLACED_PEG);
-				markers[count][count2].setBackground(UNPLACED_MARKER);
+				setButtonBackground(buttons[count][count2], UNPLACED_PEG);
+				setButtonBackground(markers[count][count2], UNPLACED_MARKER);
 			}
 		}
 		for (int count = 0; count < rowValues.length; count++)
@@ -836,11 +833,12 @@ public class MastermindActivity extends Activity
         	{
         		if (rowValues[countVert][countHoriz] >= 0)
         		{
-        			buttons[countVert][countHoriz].setBackground(PEG_BACKGROUNDS[rowValues[countVert][countHoriz]]);
+        			setButtonBackground(buttons[countVert][countHoriz], 
+        					PEG_BACKGROUNDS[rowValues[countVert][countHoriz]]);
         		}
         		else
         		{
-        			buttons[countVert][countHoriz].setBackground(UNPLACED_PEG);
+        			setButtonBackground(buttons[countVert][countHoriz], UNPLACED_PEG);
         		}
         	}
         }
@@ -853,22 +851,22 @@ public class MastermindActivity extends Activity
         		{
 	        		case CORRECT_COLOR:
 					{
-						markers[countVert][countHoriz].setBackground(CORRECT_MARKER);
+						setButtonBackground(markers[countVert][countHoriz], CORRECT_MARKER);
 						break;
 					}
 					case MISPLACED_COLOR:
 					{
-						markers[countVert][countHoriz].setBackground(MISPLACED_MARKER);
+						setButtonBackground(markers[countVert][countHoriz], MISPLACED_MARKER);
 						break;
 					}
 					case WRONG_COLOR:
 					{
-						markers[countVert][countHoriz].setBackground(WRONG_MARKER);
+						setButtonBackground(markers[countVert][countHoriz], WRONG_MARKER);
 						break;
 					}
 					default:
 					{
-						markers[countVert][countHoriz].setBackground(UNPLACED_MARKER);
+						setButtonBackground(markers[countVert][countHoriz], UNPLACED_MARKER);
 						break;
 					}
         		}
@@ -993,7 +991,7 @@ public class MastermindActivity extends Activity
 		for (int count = 0; count < codeSequence.length; count++)
 		{
 			codeButtons[count].setVisibility(View.VISIBLE);
-			codeButtons[count].setBackground(PEG_BACKGROUNDS[codeSequence[count]]);
+			setButtonBackground(codeButtons[count], PEG_BACKGROUNDS[codeSequence[count]]);
 		}
 	}
 	
@@ -1076,7 +1074,7 @@ public class MastermindActivity extends Activity
 			         */
 			        int draggedColor = Integer.parseInt(event.getClipData().getItemAt(0).getText().toString());
 			        rowValues[remainingGuesses][index] = draggedColor;
-			        currentRow[index].setBackground(PEG_BACKGROUNDS[draggedColor]);
+			        setButtonBackground(currentRow[index], PEG_BACKGROUNDS[draggedColor]);
 			        //Log.d("Mastermind", rowValues[remainingGuesses][index] + "");
 			        break;
 			    }
@@ -1262,19 +1260,19 @@ public class MastermindActivity extends Activity
 				case CORRECT_COLOR:
 				{
 					markerValues[remainingGuesses][count] = CORRECT_COLOR;
-					markers[remainingGuesses][count].setBackground(CORRECT_MARKER);
+					setButtonBackground(markers[remainingGuesses][count], CORRECT_MARKER);
 					break;
 				}
 				case MISPLACED_COLOR:
 				{
 					markerValues[remainingGuesses][count] = MISPLACED_COLOR;
-					markers[remainingGuesses][count].setBackground(MISPLACED_MARKER);
+					setButtonBackground(markers[remainingGuesses][count], MISPLACED_MARKER);
 					break;
 				}
 				case WRONG_COLOR:
 				{
 					markerValues[remainingGuesses][count] = WRONG_COLOR;
-					markers[remainingGuesses][count].setBackground(WRONG_MARKER);
+					setButtonBackground(markers[remainingGuesses][count], WRONG_MARKER);
 					break;
 				}
 			}
@@ -1526,4 +1524,22 @@ public class MastermindActivity extends Activity
     {
     	return BOOLEAN_EXTRAS;
     }
+
+	@Override
+	protected void onWrite(String data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onRead(String data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onConnectionLost() {
+		// TODO Auto-generated method stub
+		
+	}
 }
