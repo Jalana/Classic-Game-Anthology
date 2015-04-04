@@ -21,7 +21,7 @@ public class ActionMenu
 			"\n http://www.gnu.org/licenses/gpl.html" +
 			
 			"\n\nIf you wish to access the source code, send an e-mail to: " +
-			"\n connorkyle81@gmail.com"
+			"\n kyle8c@gmail.com"
 			;
 	
 	

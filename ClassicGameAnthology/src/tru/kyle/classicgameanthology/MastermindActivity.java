@@ -1405,7 +1405,15 @@ public class MastermindActivity extends Activity
 					
 				}
 			}
-			mainLayout.setOnClickListener(null);
+			if (mainLayout != null)
+			{
+				mainLayout.setOnClickListener(null);
+			}
+			Intent intent = new Intent(MastermindActivity.this, MainMenuActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			//intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, 
+			//		getIntent().getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY));
+			startActivity(intent);
 			MastermindActivity.this.finish();
 		}
 	};

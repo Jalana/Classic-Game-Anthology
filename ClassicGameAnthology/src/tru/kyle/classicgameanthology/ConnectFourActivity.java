@@ -74,7 +74,6 @@ public class ConnectFourActivity extends BaseActivity
 	final char BLANK_MARK = ' ';
 	
 	boolean gameInProgress = false;
-	boolean gameEnded = false;
 	boolean canPressButton;
 	boolean usingGuestNames = false;
 	boolean usingBluetooth = false;
@@ -690,7 +689,7 @@ public class ConnectFourActivity extends BaseActivity
         		endMatch.onClick(v);
         	}
         	
-        	if (canPressButton == true)// || (usingBluetooth == true && currentTurn != thisTurn))
+        	if (canPressButton == true)
         	{
             	Button B = (Button) v;
             	evaluateMove(B);
@@ -838,7 +837,7 @@ public class ConnectFourActivity extends BaseActivity
 		public void onClick(View v) 
 		{
 			if (usingGuestNames == false && gameInProgress == true 
-					&& gameEnded == false && usingBluetooth == false)
+					&& usingBluetooth == false)
 			{
 				saveFile();
 				//Create a dialog to prompt the user for a filename.

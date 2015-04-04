@@ -51,7 +51,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class PenteActivity extends Activity 
+public class PenteActivity extends BaseActivity 
 {
 	private String gridString;
 	private static final String GRID_15_15 = "15x15";
@@ -89,8 +89,10 @@ public class PenteActivity extends Activity
 	boolean gameInProgress = false;
 	boolean canPressButton;
 	boolean usingGuestNames = false;
+	boolean usingBluetooth = false;
 	
 	int currentTurn = 1;
+	int thisTurn = 1;
 	
 	char currentMark;
 	
@@ -174,6 +176,21 @@ public class PenteActivity extends Activity
     	filenameNames = getString(R.string.filenameNames);
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	usingBluetooth = intent.getBooleanExtra(MainMenuActivity.USING_BLUETOOTH_KEY, false);
+    	if (usingBluetooth == true)
+    	{
+    		Log.d("Bluetooth Logs", "Host status: " + 
+    				((Boolean)intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false)).toString());
+    		if (intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false) == true)
+    		{
+    			thisTurn = 1;
+    		}
+    		else
+    		{
+    			thisTurn = 2;
+    			canPressButton = false;
+    		}
+    	}
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -259,7 +276,10 @@ public class PenteActivity extends Activity
 		}
 		
 		gameInProgress = true;
-		canPressButton = true;
+		if (usingBluetooth == false || thisTurn == currentTurn)
+		{
+			canPressButton = true;
+		}
 		soundPlayer = null;
 	}
 	
@@ -852,107 +872,117 @@ public class PenteActivity extends Activity
         	
         	if (canPressButton == true)
         	{
-        		canPressButton = false;
-            	Button B = (Button) v;
-            	boolean result = false;
-            	boolean status = false;
-            	int count = 0;
-            	int count2 = 0;
-            	for (count = 0; count < buttons.length && status == false; count++)
-            	{
-            		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
-            		{
-            			if (buttons[count][count2] == B)
-            			{
-            				status = true;
-            			}
-            		}
-            	}
-            	count--;
-            	count2--;
-            	//This decrement is to prevent an off-by-one error. When the for loops end, 
-            	//		the counts are each one too high relative to the actual index of the button.
-            	int presentTurn = currentTurn;
-            	if (lastCaptures.isEmpty() == false)
-        		{
-        			clearCaptureHighlights();
-        		}
-            	if (lastLines.isEmpty() == false)
-            	{
-            		clearLineHighlights();
-            	}
-            	int capturedPieces = loopCaptures(count, count2, presentTurn, true);
-            	if (capturedPieces > 0)
-            	{
-            		captures[presentTurn - 1] += capturedPieces / 2;
-            		turnCount -= capturedPieces / 2;
-            	}
-
-            	turnCount++;
-            	int value = addMark(presentTurn, B);
-            	B.setClickable(false);
-            	//B.setBackgroundColor(Color.WHITE);
-            	if (previousMove == null)
-            	{
-            		previousMove = B;
-            	}
-            	highlightPrevious(B);
-            	previousMove = B;
-            	pointsPlaced[count][count2] = value;
-            	
-            	result = loopLines(count, count2, presentTurn);
-            	if (lastLines.isEmpty() == false && true == highlightMoves)
-            	{
-            		highlightMoves(B);
-            	}
-            	if (true == highlightMoves && lastLines.isEmpty() == false)
-            	{
-            		playSound(MainMenuActivity.WARNING_SOUND);
-            	}
-            	else if (true == highlightMoves && capturedPieces > 0)
-            	{
-            		playSound(MainMenuActivity.LOST_PIECE_SOUND);
-            	}
-            	else
-            	{
-            		playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
-            	}
-            	
-            	swapTurn();
-            	
-            	if (captures[presentTurn - 1] >= 5)
-            	{
-            		result = true;
-            	}
-            	
-            	if (result == true)
-            	{
-            		displayWinner(presentTurn);
-            	}
-            	else if (turnCount == TURN_LIMIT)
-            	{
-            		displayTie();
-            	}
-            	else
-            	{
-            		new CountDownTimer(500, 300)
-                	{
-            			@Override
-            			public void onTick(long millisUntilFinished) 
-            			{
-            				
-            			}
-
-            			@Override
-            			public void onFinish() 
-            			{
-            				canPressButton = true;
-            			}
-                	}.start();
-            	}
+        		evaluateMove((Button) v);
         	}
         }
     };
+    
+    private void evaluateMove(Button B)
+    {
+		canPressButton = false;
+    	boolean result = false;
+    	boolean status = false;
+    	int count = 0;
+    	int count2 = 0;
+    	for (count = 0; count < buttons.length && status == false; count++)
+    	{
+    		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
+    		{
+    			if (buttons[count][count2] == B)
+    			{
+    				status = true;
+    			}
+    		}
+    	}
+    	count--;
+    	count2--;
+    	//This decrement is to prevent an off-by-one error. When the for loops end, 
+    	//		the counts are each one too high relative to the actual index of the button.
+    	int presentTurn = currentTurn;
+    	if (lastCaptures.isEmpty() == false)
+		{
+			clearCaptureHighlights();
+		}
+    	if (lastLines.isEmpty() == false)
+    	{
+    		clearLineHighlights();
+    	}
+    	int capturedPieces = loopCaptures(count, count2, presentTurn, true);
+    	if (capturedPieces > 0)
+    	{
+    		captures[presentTurn - 1] += capturedPieces / 2;
+    		turnCount -= capturedPieces / 2;
+    	}
+
+    	turnCount++;
+    	int value = addMark(presentTurn, B);
+    	B.setClickable(false);
+    	//B.setBackgroundColor(Color.WHITE);
+    	if (previousMove == null)
+    	{
+    		previousMove = B;
+    	}
+    	highlightPrevious(B);
+    	previousMove = B;
+    	pointsPlaced[count][count2] = value;
+    	
+    	result = loopLines(count, count2, presentTurn);
+    	if (lastLines.isEmpty() == false && true == highlightMoves)
+    	{
+    		highlightMoves(B);
+    	}
+    	if (true == highlightMoves && lastLines.isEmpty() == false)
+    	{
+    		playSound(MainMenuActivity.WARNING_SOUND);
+    	}
+    	else if (true == highlightMoves && capturedPieces > 0)
+    	{
+    		playSound(MainMenuActivity.LOST_PIECE_SOUND);
+    	}
+    	else
+    	{
+    		playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
+    	}
+    	
+    	if (usingBluetooth == true && currentTurn == thisTurn)
+    	{
+    		String data = count + DBInterface.GRID_ITEM_SEPARATOR + count2;
+    		bluetooth.write(data);
+    	}
+    	
+    	swapTurn();
+    	
+    	if (captures[presentTurn - 1] >= 5)
+    	{
+    		result = true;
+    	}
+    	
+    	if (result == true)
+    	{
+    		displayWinner(presentTurn);
+    	}
+    	else if (turnCount == TURN_LIMIT)
+    	{
+    		displayTie();
+    	}
+    	else if (usingBluetooth == false || currentTurn == thisTurn)
+    	{
+    		new CountDownTimer(500, 300)
+        	{
+    			@Override
+    			public void onTick(long millisUntilFinished) 
+    			{
+    				
+    			}
+
+    			@Override
+    			public void onFinish() 
+    			{
+    				canPressButton = true;
+    			}
+        	}.start();
+    	}
+    }
      
     public void highlightPrevious(Button B)
     {
@@ -1030,7 +1060,8 @@ public class PenteActivity extends Activity
 		@Override
 		public void onClick(View v) 
 		{
-			if (usingGuestNames == false && gameInProgress == true)
+			if (usingGuestNames == false && gameInProgress == true 
+					&& usingBluetooth == false)
 			{
 				saveFile();
 			}
@@ -1127,7 +1158,26 @@ public class PenteActivity extends Activity
     		winners = null;
     	}
     	
-    	if (usingGuestNames == false)
+    	if (usingBluetooth == true)
+    	{
+    		bluetooth.toggleHost();
+    		if (thisTurn != result)
+    		{
+    			winners = null;
+    		}
+    		
+    		if (thisTurn == 1)
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+            			new String[]{playerOneName}, THIS_GAME, winners);
+    		}
+    		else
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+    					new String[]{playerTwoName}, THIS_GAME, winners);
+    		}
+    	}
+    	else if (usingGuestNames == false)
     	{
     		DBInterface.updatePlayerScores(getApplicationContext(), 
         			new String[]{playerOneName, playerTwoName}, THIS_GAME, winners);
@@ -1164,7 +1214,15 @@ public class PenteActivity extends Activity
 					
 				}
 			}
-			mainLayout.setOnClickListener(null);
+			if (mainLayout != null)
+			{
+				mainLayout.setOnClickListener(null);
+			}
+			Intent intent = new Intent(PenteActivity.this, MainMenuActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, 
+					getIntent().getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY));
+			startActivity(intent);
 			PenteActivity.this.finish();
 		}
 	};
@@ -1300,6 +1358,43 @@ public class PenteActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+	
+	@Override
+	protected void onWrite(String data) 
+	{
+		//Log.d("Bluetooth Logs", "Wrote from Pente: " + data);
+	}
+
+
+	@Override
+	protected void onRead(String data)
+	{
+		Log.d("Bluetooth Logs", "Read from Pente: " + data);
+		try
+		{
+			String[] nextMove = data.split(DBInterface.GRID_ITEM_SEPARATOR);
+			int vertIndex = Integer.parseInt(nextMove[0]);
+			int horizIndex = Integer.parseInt(nextMove[1]);
+			if (gameInProgress == true && thisTurn != currentTurn && canPressButton == false)
+			{
+				evaluateMove(buttons[vertIndex][horizIndex]);
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			Log.d("Bluetooth Logs", "Pente read taken as name");
+			getIntent().putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", data);
+			playerTwoName = data;
+			playerTwoDisplay.setText(playerTwoName);
+		}
+	}
+	
+	@Override
+	protected void onConnectionLost()
+	{
+		Toast.makeText(this, "The connection was lost.", Toast.LENGTH_LONG).show();
+		endMatch.onClick(null);
+	}
     
     protected static Integer[] getPlayerCounts()
     {

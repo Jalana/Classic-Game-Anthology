@@ -53,7 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class ReversiActivity extends Activity 
+public class ReversiActivity extends BaseActivity
 {
 	protected static final String[][] EXTRAS = null;
 	
@@ -87,6 +87,8 @@ public class ReversiActivity extends Activity
 	boolean usingGuestNames = false;
 	
 	int currentTurn = 1;
+	int thisTurn = 1;
+	boolean usingBluetooth;
 	
 	char currentMark;
 	
@@ -169,6 +171,21 @@ public class ReversiActivity extends Activity
     	filenameNames = getString(R.string.filenameNames);
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	usingBluetooth = intent.getBooleanExtra(MainMenuActivity.USING_BLUETOOTH_KEY, false);
+    	if (usingBluetooth == true)
+    	{
+    		Log.d("Bluetooth Logs", "Host status: " + 
+    				((Boolean)intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false)).toString());
+    		if (intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false) == true)
+    		{
+    			thisTurn = 1;
+    		}
+    		else
+    		{
+    			thisTurn = 2;
+    			canPressButton = false;
+    		}
+    	}
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -258,7 +275,10 @@ public class ReversiActivity extends Activity
 		}
 		
 		gameInProgress = true;
-		canPressButton = true;
+		if (usingBluetooth == false || thisTurn == currentTurn)
+		{
+			canPressButton = true;
+		}
 		soundPlayer = null;
 	}
 	
@@ -738,131 +758,141 @@ public class ReversiActivity extends Activity
     private OnClickListener grid_handler = new OnClickListener() 
     { 
         public void onClick(View v) 
-        { 
+        {
+        	if (endOfMatch == true)
+        	{
+        		canPressButton = false;
+        		endMatch.onClick(v);
+        	}
+        	
         	if (canPressButton == true)
         	{
-        		if (endOfMatch == true)
-            	{
-            		canPressButton = false;
-            		endMatch.onClick(v);
-            	}
-            	
-        		canPressButton = false;
-            	Button B = (Button) v;
-            	boolean status = false;
-            	int count = 0;
-            	int count2 = 0;
-            	for (count = 0; count < buttons.length && status == false; count++)
-            	{
-            		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
-            		{
-            			if (buttons[count][count2] == B)
-            			{
-            				status = true;
-            			}
-            		}
-            	}
-            	count--;
-            	count2--;
-            	//This decrement is to prevent an off-by-one error. When the for loops end, 
-            	//		the counts are each one too high relative to the actual index of the button.
-            	int presentTurn = currentTurn;
-            	int capturedPieces = loopCaptures(count, count2, presentTurn, false);
-            	
-            	if (capturedPieces == 0)
-            	{
-            		String message = "That move is invalid.";
-            		message += "\nAll moves must capture at least one of the opponent's pieces.";
-            		warning.setText(message);
-            		warning.setDuration(Toast.LENGTH_LONG);
-            		warning.show();
-            		//Reveal some button to allow a forced skip to the next player's turn here?
-            		//		This button would be hidden on a successful move, and not be shown until a move has been failed.
-            		
-            		if ((failedAttempts.size() + turnCount + 1) >= TURN_LIMIT)
-					{
-						if (true == lastPlayerSkipped)
-						{
-							turnCount = TURN_LIMIT;
-						}
-						else
-						{
-							lastPlayerSkipped = true;
-							clearFailures();
-							String outOfMoves = "No legal moves are available.\n";
-							if (currentTurn == 1)
-							{
-								outOfMoves += playerOneName;
-							}
-							else
-							{
-								outOfMoves += playerTwoName;
-							}
-							outOfMoves += "'s turn has been skipped.";
-							warning.setText(outOfMoves);
-		            		warning.show();
-							swapTurn();
-							canPressButton = true;
-						}
-					}
-            		else
-            		{
-            			B.setClickable(false);
-            			highlightFailedAttempt(B);
-            			failedAttempts.enqueue(B);
-            		}
-            	}
-            	else
-            	{
-            		lastPlayerSkipped = false;
-            		if (lastCaptures.isEmpty() == false)
-            		{
-            			clearCaptureHighlights();
-            		}
-            		clearFailures();
-            		capturedPieces = loopCaptures(count, count2, presentTurn, true);
-	            	turnCount++;
-	            	int value = addMark(presentTurn, B);
-	            	B.setClickable(false);
-	            	//B.setBackgroundColor(Color.WHITE);
-	            	if (previousMove == null)
-	            	{
-	            		previousMove = B;
-	            	}
-	            	highlightPrevious(B);
-	            	previousMove = B;
-	            	pointsPlaced[count][count2] = value;
-	            	
-	            	playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
-	            	countPieces();
-	            	
-	            	swapTurn();
-            	}
-            	
-            	if (turnCount == TURN_LIMIT)
-            	{
-            		findWinner();
-            	}
-            	else
-            	{
-            		new CountDownTimer(500, 300)
-                	{
-            			@Override
-            			public void onTick(long millisUntilFinished) 
-            			{
-            				
-            			}
-
-            			@Override
-            			public void onFinish() 
-            			{
-            				canPressButton = true;
-            			}
-                	}.start();
-            	}
+        		evaluateMove((Button) v);
         	}
         }
     };
+    
+    private void evaluateMove(Button B)
+    {
+    	canPressButton = false;
+    	boolean status = false;
+    	int count = 0;
+    	int count2 = 0;
+    	for (count = 0; count < buttons.length && status == false; count++)
+    	{
+    		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
+    		{
+    			if (buttons[count][count2] == B)
+    			{
+    				status = true;
+    			}
+    		}
+    	}
+    	count--;
+    	count2--;
+    	//This decrement is to prevent an off-by-one error. When the for loops end, 
+    	//		the counts are each one too high relative to the actual index of the button.
+    	int presentTurn = currentTurn;
+    	int capturedPieces = loopCaptures(count, count2, presentTurn, false);
+    	
+    	if (usingBluetooth == true && currentTurn == thisTurn)
+    	{
+    		String data = count + DBInterface.GRID_ITEM_SEPARATOR + count2;
+    		bluetooth.write(data);
+    	}
+    	
+    	if (capturedPieces == 0)
+    	{
+    		String message = "That move is invalid.";
+    		message += "\nAll moves must capture at least one of the opponent's pieces.";
+    		warning.setText(message);
+    		warning.setDuration(Toast.LENGTH_LONG);
+    		warning.show();
+    		//Reveal some button to allow a forced skip to the next player's turn here?
+    		//		This button would be hidden on a successful move, and not be shown until a move has been failed.
+    		
+    		if ((failedAttempts.size() + turnCount + 1) >= TURN_LIMIT)
+			{
+				if (true == lastPlayerSkipped)
+				{
+					turnCount = TURN_LIMIT;
+				}
+				else
+				{
+					lastPlayerSkipped = true;
+					clearFailures();
+					String outOfMoves = "No legal moves are available.\n";
+					if (currentTurn == 1)
+					{
+						outOfMoves += playerOneName;
+					}
+					else
+					{
+						outOfMoves += playerTwoName;
+					}
+					outOfMoves += "'s turn has been skipped.";
+					warning.setText(outOfMoves);
+            		warning.show();
+					swapTurn();
+					canPressButton = true;
+				}
+			}
+    		else
+    		{
+    			B.setClickable(false);
+    			highlightFailedAttempt(B);
+    			failedAttempts.enqueue(B);
+    		}
+    	}
+    	else
+    	{
+    		lastPlayerSkipped = false;
+    		if (lastCaptures.isEmpty() == false)
+    		{
+    			clearCaptureHighlights();
+    		}
+    		clearFailures();
+    		capturedPieces = loopCaptures(count, count2, presentTurn, true);
+        	turnCount++;
+        	int value = addMark(presentTurn, B);
+        	B.setClickable(false);
+        	//B.setBackgroundColor(Color.WHITE);
+        	if (previousMove == null)
+        	{
+        		previousMove = B;
+        	}
+        	highlightPrevious(B);
+        	previousMove = B;
+        	pointsPlaced[count][count2] = value;
+        	
+        	playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
+        	countPieces();
+        	
+        	swapTurn();
+    	}
+    	
+    	if (turnCount == TURN_LIMIT)
+    	{
+    		findWinner();
+    	}
+    	else if (usingBluetooth == false || currentTurn == thisTurn)
+    	{
+    		new CountDownTimer(500, 300)
+        	{
+    			@Override
+    			public void onTick(long millisUntilFinished) 
+    			{
+    				
+    			}
+
+    			@Override
+    			public void onFinish() 
+    			{
+    				canPressButton = true;
+    			}
+        	}.start();
+    	}
+	}
     
     public void clearFailures()
     {
@@ -934,7 +964,8 @@ public class ReversiActivity extends Activity
 		@Override
 		public void onClick(View v) 
 		{
-			if (usingGuestNames == false && gameInProgress == true)
+			if (usingGuestNames == false && gameInProgress == true 
+					&& usingBluetooth == false)
 			{
 				saveFile();
 			}
@@ -1051,7 +1082,26 @@ public class ReversiActivity extends Activity
     		winners = null;
     	}
     	
-    	if (usingGuestNames == false)
+    	if (usingBluetooth == true)
+    	{
+    		bluetooth.toggleHost();
+    		if (thisTurn != result)
+    		{
+    			winners = null;
+    		}
+    		
+    		if (thisTurn == 1)
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+            			new String[]{playerOneName}, THIS_GAME, winners);
+    		}
+    		else
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+    					new String[]{playerTwoName}, THIS_GAME, winners);
+    		}
+    	}
+    	else if (usingGuestNames == false)
     	{
     		DBInterface.updatePlayerScores(getApplicationContext(), 
         			new String[]{playerOneName, playerTwoName}, THIS_GAME, winners);
@@ -1088,7 +1138,15 @@ public class ReversiActivity extends Activity
 					
 				}
 			}
-			mainLayout.setOnClickListener(null);
+			if (mainLayout != null)
+			{
+				mainLayout.setOnClickListener(null);
+			}
+			Intent intent = new Intent(ReversiActivity.this, MainMenuActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, 
+					getIntent().getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY));
+			startActivity(intent);
 			ReversiActivity.this.finish();
 		}
 	};
@@ -1224,6 +1282,43 @@ public class ReversiActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+	
+	@Override
+	protected void onWrite(String data) 
+	{
+		//Log.d("Bluetooth Logs", "Wrote from Reversi: " + data);
+	}
+
+
+	@Override
+	protected void onRead(String data)
+	{
+		Log.d("Bluetooth Logs", "Read from Reversi: " + data);
+		try
+		{
+			String[] nextMove = data.split(DBInterface.GRID_ITEM_SEPARATOR);
+			int vertIndex = Integer.parseInt(nextMove[0]);
+			int horizIndex = Integer.parseInt(nextMove[1]);
+			if (gameInProgress == true && thisTurn != currentTurn && canPressButton == false)
+			{
+				evaluateMove(buttons[vertIndex][horizIndex]);
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			Log.d("Bluetooth Logs", "Reversi read taken as name");
+			getIntent().putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", data);
+			playerTwoName = data;
+			playerTwoDisplay.setText(playerTwoName);
+		}
+	}
+	
+	@Override
+	protected void onConnectionLost()
+	{
+		Toast.makeText(this, "The connection was lost.", Toast.LENGTH_LONG).show();
+		endMatch.onClick(null);
+	}
     
     protected static Integer[] getPlayerCounts()
     {

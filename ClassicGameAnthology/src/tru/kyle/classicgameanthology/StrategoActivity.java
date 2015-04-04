@@ -46,13 +46,13 @@ import android.widget.Toast;
  */
 
 
-public class StrategoActivity extends Activity 
+public class StrategoActivity extends BaseActivity 
 {
 	protected static final String[][] EXTRAS = null;
 	
 	//These are pulled by the MainMenuActivity and used to title checkboxes.
 	private static final String REVEALS = "Permanent Reveals?";
-	private static final String HIGHLIGHTS = "Highlight Moves?";
+	//private static final String HIGHLIGHTS = "Highlight Moves?";
 	protected static final String[] BOOLEAN_EXTRAS = {
 		REVEALS//,
 		//HIGHLIGHTS
@@ -69,6 +69,9 @@ public class StrategoActivity extends Activity
 	private final String BUTTON_BACK_MOVABLE_P_2_STRING = "button_space_movable_blue_" + THIS_LAYOUT.toString();
 	
 	private final String BUTTON_BACK_LAKE_STRING = "button_space_lake_" + THIS_LAYOUT.toString();
+	
+	private static final String PLACEMENT_SIGNAL = "placement";
+	private static final String MOVE_SIGNAL = "move";
 	
 	public static final int VERTICAL_LIMIT = 10;
 	public static final int HORIZONTAL_LIMIT = 10;
@@ -87,6 +90,13 @@ public class StrategoActivity extends Activity
 	boolean gameEnded = false;
 	boolean usingGuestNames = false;
 	boolean placementListenersSet = false;
+	boolean canMakeMove = true;
+	
+	int thisTurn = 1;
+	boolean usingBluetooth = false;
+	
+	boolean userFinishedPlacement = false;
+	boolean opponentFinishedPlacement = false;
 	
 	int currentTurn = 1;
 	int turnCount;
@@ -209,6 +219,21 @@ public class StrategoActivity extends Activity
         }
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	usingBluetooth = intent.getBooleanExtra(MainMenuActivity.USING_BLUETOOTH_KEY, false);
+    	if (usingBluetooth == true)
+    	{
+    		Log.d("Bluetooth Logs", "Host status: " + 
+    				((Boolean)intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false)).toString());
+    		if (intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false) == true)
+    		{
+    			thisTurn = 1;
+    		}
+    		else
+    		{
+    			thisTurn = 2;
+    			canMakeMove = false;
+    		}
+    	}
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -222,10 +247,11 @@ public class StrategoActivity extends Activity
     	
     	if (newMatch == true)
     	{
-    		currentTurn = 1;
+    		currentTurn = thisTurn;
     		parseExtras(intent);
     		setButtons(res);
     		resetData();
+    		currentTurn = thisTurn;
     		setUpPlacement(currentTurn, true);
     	}
     	else
@@ -298,6 +324,10 @@ public class StrategoActivity extends Activity
 			{
 				swapTurn();
 			}
+			if (usingBluetooth == false || thisTurn == currentTurn)
+			{
+				canMakeMove = true;
+			}
 		}
 		soundPlayer = null;
 	}
@@ -350,7 +380,7 @@ public class StrategoActivity extends Activity
 				soundPlayer.stop();
 				soundPlayer.release();
 			}
-			catch (IllegalArgumentException e)
+			catch (IllegalStateException e)
 			{
 				
 			}
@@ -866,15 +896,22 @@ public class StrategoActivity extends Activity
 		{
 			public void onClick(DialogInterface dialog, int id) 
 			{
-				if (currentTurn == 1)
+				if (usingBluetooth == true)
 				{
-					currentTurn = 2;
-					setUpPlacement(currentTurn, true);
+					transmitPlacement();
 				}
 				else
 				{
-					endPlacement();
-					swapTurn();
+					if (currentTurn == 1)
+					{
+						currentTurn = 2;
+						setUpPlacement(currentTurn, true);
+					}
+					else
+					{
+						endPlacement();
+						swapTurn();
+					}
 				}
 				confirmPlacementDialog.dismiss();
 			}
@@ -892,6 +929,74 @@ public class StrategoActivity extends Activity
 		confirmPlacementDialog.show();
 	}
 	
+	private void transmitPlacement()
+	{
+		ArrayList<String> pieces = new ArrayList<String>();
+		for (int vertIndex = 0; vertIndex < gridPieces.length; vertIndex++)
+		{
+			for (int horizIndex = 0; horizIndex < gridPieces[vertIndex].length; horizIndex++)
+			{
+				if (gridPieces[vertIndex][horizIndex] != null && 
+						gridPieces[vertIndex][horizIndex].getOwner() == thisTurn)
+				{
+					pieces.add(gridPieces[vertIndex][horizIndex].toDBString());
+				}
+			}
+		}
+		String data = PLACEMENT_SIGNAL + DBInterface.GRID_ROW_SEPARATOR;
+		data += DBInterface.dataToString(pieces);
+		bluetooth.write(data);
+		
+		Log.d("Stratego", "TransmitPlacement occurred");
+		userFinishedPlacement = true;
+		if (opponentFinishedPlacement == true)
+		{
+			Log.d("Stratego", "Starting game from transmit");
+			endPlacement();
+			swapTurn();
+			while (currentTurn != 1)
+			{
+				swapTurn();
+			}
+		}
+	}
+	
+	private void receivePlacement(String[] data)
+	{
+		String[] piecesAsStrings = data;
+		if (piecesAsStrings != null)
+		{
+			StrategoPiece tempPiece;
+			int vertIndex = 0;
+			int horizIndex = 0;
+			for (int count = 1; count < piecesAsStrings.length; count++)
+			{
+				if (piecesAsStrings[count] == "")
+				{
+					continue;
+				}
+				tempPiece = new StrategoPiece(piecesAsStrings[count]);
+				vertIndex = tempPiece.getLocationX();
+				horizIndex = tempPiece.getLocationY();
+				gridPieces[vertIndex][horizIndex] = tempPiece;
+				addMark(tempPiece, gridButtons[vertIndex][horizIndex]);
+			}
+		}
+		
+		Log.d("Stratego", "receivePlacement occurred");
+		opponentFinishedPlacement = true;
+		if (userFinishedPlacement == true)
+		{
+			Log.d("Stratego", "Starting game from receive");
+			endPlacement();
+			swapTurn();
+			while (currentTurn != 1)
+			{
+				swapTurn();
+			}
+		}
+	}
+	
 	private void endPlacement()
 	{
 		for (int count = 0; count < hintButtons.length; count++)
@@ -906,6 +1011,10 @@ public class StrategoActivity extends Activity
 		temp.setVisibility(View.GONE);
 		placementInProgress = false;
 		gameInProgress = true;
+		if (usingBluetooth == false || currentTurn == thisTurn)
+		{
+			canMakeMove = true;
+		}
 	}
 	
 	//
@@ -967,7 +1076,11 @@ public class StrategoActivity extends Activity
 		}
 		temp += "'s turn!";
 		activePlayerDisplay.setText(temp);
-		showPlayerPieces(currentTurn);
+		
+		if (usingBluetooth == false || currentTurn == thisTurn)
+		{
+			showPlayerPieces(currentTurn);
+		}
 		
 		if (remainingPieces[currentTurn] <= stalemateCheck)
 		{
@@ -976,6 +1089,16 @@ public class StrategoActivity extends Activity
 				displayWinner(previous);
 				return;
 			}
+		}
+		
+		if (usingBluetooth == false || currentTurn == thisTurn 
+				|| placementInProgress == true)
+		{
+			canMakeMove = true;
+		}
+		else
+		{
+			canMakeMove = false;
 		}
 	}
 	
@@ -1124,17 +1247,30 @@ public class StrategoActivity extends Activity
 	
 	private void clearPotentialMoves()
 	{
-		for (int count = 0; count < availableLocationButtons.length; count++)
+		if (availableLocationButtons != null)
 		{
-			availableLocationButtons[count].setBackground(availableLocationOldBackgrounds[count]);
+			for (int count = 0; count < availableLocationButtons.length; count++)
+			{
+				if (availableLocationButtons[count] != null)
+				{
+					availableLocationButtons[count].setBackground(
+							availableLocationOldBackgrounds[count]);
+				}
+			}
 		}
 	}
 	
 	private void resetDragHandlers()
 	{
-		for (int count = 0; count < availableLocationButtons.length; count++)
+		if (availableLocationButtons != null)
 		{
-			availableLocationButtons[count].setOnDragListener(null);
+			for (int count = 0; count < availableLocationButtons.length; count++)
+			{
+				if (availableLocationButtons[count] != null)
+				{
+					availableLocationButtons[count].setOnDragListener(null);
+				}
+			}
 		}
 		availableLocationButtons = new Button[]{};
 	}
@@ -1194,7 +1330,26 @@ public class StrategoActivity extends Activity
     		winners = null;
     	}
     	
-    	if (usingGuestNames == false)
+    	if (usingBluetooth == true)
+    	{
+    		bluetooth.toggleHost();
+    		if (thisTurn != result)
+    		{
+    			winners = null;
+    		}
+    		
+    		if (thisTurn == 1)
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+            			new String[]{playerOneName}, THIS_GAME, winners);
+    		}
+    		else
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+    					new String[]{playerTwoName}, THIS_GAME, winners);
+    		}
+    	}
+    	else if (usingGuestNames == false)
     	{
     		DBInterface.updatePlayerScores(getApplicationContext(), 
         			new String[]{playerOneName, playerTwoName}, THIS_GAME, winners);
@@ -1229,7 +1384,15 @@ public class StrategoActivity extends Activity
 					
 				}
 			}
-			mainLayout.setOnClickListener(null);
+			if (mainLayout != null)
+			{
+				mainLayout.setOnClickListener(null);
+			}
+			Intent intent = new Intent(StrategoActivity.this, MainMenuActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, 
+					getIntent().getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY));
+			startActivity(intent);
 			StrategoActivity.this.finish();
 		}
 	};
@@ -1315,98 +1478,13 @@ public class StrategoActivity extends Activity
 			    }
 			    case DragEvent.ACTION_DROP:
 			    {
-			    	Button b = (Button) v;
-			    	boolean victoryDetected = false;
-					
-					StrategoPiece defendingPiece = null;
-					int vertIndex = 0;
-					int horizIndex = 0;
-					boolean foundMatch = false;
-					for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
-					{
-						for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
-						{
-							if (gridButtons[vertIndex][horizIndex] == b)
-							{
-								defendingPiece = gridPieces[vertIndex][horizIndex];
-								foundMatch = true;
-								break;
-							}
-						}
-						if (foundMatch == true)
-						{
-							break;
-						}
-					}
-					
-					clearPotentialMoves();
-					
-					if (defendingPiece != null)
-					{
-						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
-						addMark(null, gridButtons[currentAttacker.getLocationX()][currentAttacker.getLocationY()]);
-						defendingPiece.updateCoordinates(vertIndex, horizIndex);
-						StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
-						gridPieces[vertIndex][horizIndex] = victor;
-						addMark(victor, gridButtons[vertIndex][horizIndex]);
-						
-						if (victor == currentAttacker)
-						{
-							remainingPieces[defendingPiece.getOwner()] -= 1;
-							currentAttacker.updateCoordinates(vertIndex, horizIndex);
-							if (defendingPiece.getRank() == StrategoPiece.RankValues.Flag)
-							{
-								displayWinner(currentAttacker.getOwner());
-								victoryDetected = true;
-							}
-						}
-						else
-						{
-							remainingPieces[currentAttacker.getOwner()] -= 1;
-							if (victor == null)
-							{
-								remainingPieces[defendingPiece.getOwner()] -= 1;
-							}
-						}
-						
-						String message = "A " + currentAttacker.getRank().toString() + 
-								" attacked a " + defendingPiece.getRank().toString() + ".";
-						if (victor != null)
-						{
-							victor.revealPiece();
-							message += "\nThe " + victor.getRank().toString() + " was victorious.";
-						}
-						else
-						{
-							message += "\nBoth pieces were destroyed.";
-						}
-						Toast.makeText(StrategoActivity.this, message, Toast.LENGTH_SHORT).show();
-						if (victoryDetected == false)
-						{
-							playSound(MainMenuActivity.LOST_PIECE_SOUND);
-						}
-					}
-					else
-					{
-						addMark(null, gridButtons[currentAttacker.getLocationX()][currentAttacker.getLocationY()]);
-						gridPieces[vertIndex][horizIndex] = currentAttacker;
-						gridPieces[currentAttacker.getLocationX()][currentAttacker.getLocationY()] = null;
-						currentAttacker.updateCoordinates(vertIndex, horizIndex);
-						addMark(currentAttacker, b);
-						playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
-					}
+			    	evaluateMove((Button) v);
 			        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
 			        //set the Handled value to true like before.
-			        //
-			        handled = true;
-			        resetDragHandlers();
-			        if (victoryDetected == false)
-			        {
-			        	prepareTurnChange(currentAttacker.getOwner());
-			        }
+					
 			        //It's also probably time to get a bit of the data associated with the drag to know what
 			        //you want to do with the information.
-			        //
+			        handled = true;
 			        break;
 			    }
 			    case DragEvent.ACTION_DRAG_ENDED:
@@ -1423,6 +1501,114 @@ public class StrategoActivity extends Activity
 		}
 	};
 	
+	private void evaluateMove(Button b)
+	{
+		boolean victoryDetected = false;
+		
+		StrategoPiece defendingPiece = null;
+		int vertIndex = 0;
+		int horizIndex = 0;
+		boolean foundMatch = false;
+		for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+		{
+			for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+			{
+				if (gridButtons[vertIndex][horizIndex] == b)
+				{
+					defendingPiece = gridPieces[vertIndex][horizIndex];
+					foundMatch = true;
+					break;
+				}
+			}
+			if (foundMatch == true)
+			{
+				break;
+			}
+		}
+		int attackVert = currentAttacker.getLocationX();
+		int attackHoriz = currentAttacker.getLocationY();
+		
+		clearPotentialMoves();
+		if (usingBluetooth == true && currentTurn == thisTurn)
+    	{
+    		String data = MOVE_SIGNAL + DBInterface.GRID_ROW_SEPARATOR;
+    		data += attackVert + DBInterface.GRID_ITEM_SEPARATOR + attackHoriz;
+    		data += DBInterface.GRID_ITEM_SEPARATOR + vertIndex;
+    		data += DBInterface.GRID_ITEM_SEPARATOR + horizIndex;
+    		bluetooth.write(data);
+    	}
+		
+		if (defendingPiece != null)
+		{
+			gridPieces[attackVert][attackHoriz] = null;
+			addMark(null, gridButtons[attackVert][attackHoriz]);
+			defendingPiece.updateCoordinates(vertIndex, horizIndex);
+			StrategoPiece victor = StrategoPiece.evaluateCombat(currentAttacker, defendingPiece);
+			gridPieces[vertIndex][horizIndex] = victor;
+			addMark(victor, gridButtons[vertIndex][horizIndex]);
+			
+			if (victor == currentAttacker)
+			{
+				remainingPieces[defendingPiece.getOwner()] -= 1;
+				currentAttacker.updateCoordinates(vertIndex, horizIndex);
+				if (defendingPiece.getRank() == StrategoPiece.RankValues.Flag)
+				{
+					displayWinner(currentAttacker.getOwner());
+					victoryDetected = true;
+				}
+			}
+			else
+			{
+				remainingPieces[currentAttacker.getOwner()] -= 1;
+				if (victor == null)
+				{
+					remainingPieces[defendingPiece.getOwner()] -= 1;
+				}
+			}
+			
+			String message = "A " + currentAttacker.getRank().toString() + 
+					" attacked a " + defendingPiece.getRank().toString() + ".";
+			if (victor != null)
+			{
+				victor.revealPiece();
+				message += "\nThe " + victor.getRank().toString() + " was victorious.";
+			}
+			else
+			{
+				message += "\nBoth pieces were destroyed.";
+			}
+			Toast.makeText(StrategoActivity.this, message, Toast.LENGTH_SHORT).show();
+			if (victoryDetected == false)
+			{
+				playSound(MainMenuActivity.LOST_PIECE_SOUND);
+			}
+		}
+		else
+		{
+			addMark(null, gridButtons[attackVert][attackHoriz]);
+			gridPieces[vertIndex][horizIndex] = currentAttacker;
+			gridPieces[attackVert][attackHoriz] = null;
+			currentAttacker.updateCoordinates(vertIndex, horizIndex);
+			addMark(currentAttacker, b);
+			playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
+		}
+        //This state is used when the user drops the view on your drop zone. If you want to accept the drop,
+        //set the Handled value to true like before.
+
+        resetDragHandlers();
+        if (victoryDetected == false)
+        {
+        	if (usingBluetooth == true)
+        	{
+        		swapTurn();
+        	}
+        	else
+        	{
+        		prepareTurnChange(currentAttacker.getOwner());
+        	}
+        }
+	}
+	
 	//Placement drag handlers are needed.
 	//	They must account for pieces being replaced (second-guessing one's choices, bad placements, etc.),
 	//		so when a drop is made the current value there must be considered (INVALID can be used for a null)
@@ -1436,48 +1622,51 @@ public class StrategoActivity extends Activity
 		@Override
 		public boolean onTouch(View v, final MotionEvent event) 
 		{
-			Button b = (Button) v;
-			
-			StrategoPiece selectedPiece = null;
-			int vertIndex = 0;
-			int horizIndex = 0;
-			boolean foundMatch = false;
-			for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
+			if (usingBluetooth == false || canMakeMove == true)
 			{
-				for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
+				Button b = (Button) v;
+				
+				StrategoPiece selectedPiece = null;
+				int vertIndex = 0;
+				int horizIndex = 0;
+				boolean foundMatch = false;
+				for (vertIndex = 0; vertIndex < gridButtons.length; vertIndex++)
 				{
-					if (gridButtons[vertIndex][horizIndex] == b)
+					for (horizIndex = 0; horizIndex < gridButtons[vertIndex].length; horizIndex++)
 					{
-						selectedPiece = gridPieces[vertIndex][horizIndex];
-						foundMatch = true;
+						if (gridButtons[vertIndex][horizIndex] == b)
+						{
+							selectedPiece = gridPieces[vertIndex][horizIndex];
+							foundMatch = true;
+							break;
+						}
+					}
+					if (foundMatch == true)
+					{
 						break;
 					}
 				}
-				if (foundMatch == true)
+				
+				if (selectedPiece != null && event.getAction() == MotionEvent.ACTION_DOWN)
 				{
-					break;
-				}
-			}
-			
-			if (selectedPiece != null && event.getAction() == MotionEvent.ACTION_DOWN)
-			{
-				selectedPiece.updateCoordinates(vertIndex, horizIndex);
-				int range = selectedPiece.getMovementRange();
-				if (range > 0)
-				{
-					currentAttacker = selectedPiece;
-					findPotentialMoves(b, currentAttacker.getOwner(), selectedPiece, vertIndex, horizIndex);
-					highlightPotentialMoves();
-					//Calculate the button's location, determine the piece currently there,
-			        //		and use those parameters to calculate available movement points.
-					//Register the onDragHandler for the appropriate gridButtons based on those results.
-					//	For movement: 
-					//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
-					//		-Bombs and the Flag cannot move at all.
-					//		-All other pieces move a single square vertically or horizontally.
-					//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
-					
-					b.startDrag(null, new View.DragShadowBuilder(b), null, 0);
+					selectedPiece.updateCoordinates(vertIndex, horizIndex);
+					int range = selectedPiece.getMovementRange();
+					if (range > 0)
+					{
+						currentAttacker = selectedPiece;
+						findPotentialMoves(b, currentAttacker.getOwner(), selectedPiece, vertIndex, horizIndex);
+						highlightPotentialMoves();
+						//Calculate the button's location, determine the piece currently there,
+				        //		and use those parameters to calculate available movement points.
+						//Register the onDragHandler for the appropriate gridButtons based on those results.
+						//	For movement: 
+						//		-Scouts have infinite straight-line movement (until they hit a barrier of any sort).
+						//		-Bombs and the Flag cannot move at all.
+						//		-All other pieces move a single square vertically or horizontally.
+						//			-No diagonal movement is allowed for any piece, nor can pieces pass through other pieces.
+						
+						b.startDrag(null, new View.DragShadowBuilder(b), null, 0);
+					}
 				}
 			}
 			return false;
@@ -1602,6 +1791,10 @@ public class StrategoActivity extends Activity
 		public boolean onTouch(View v, final MotionEvent event) 
 		{
 			Button b = (Button) v;
+			if (userFinishedPlacement == true)
+			{
+				return false;
+			}
 			
 			int pieceRank;
 			for (pieceRank = 0; pieceRank < placementButtons.length; pieceRank++)
@@ -1636,7 +1829,8 @@ public class StrategoActivity extends Activity
 		public void onClick(View v) 
 		{
 			if (usingGuestNames == false && endOfMatch == false &&
-					(gameInProgress == true || placementInProgress == true))
+					(gameInProgress == true || placementInProgress == true)
+					&& usingBluetooth == false)
 			{
 				saveFile();
 			}
@@ -1728,6 +1922,58 @@ public class StrategoActivity extends Activity
 		soundPlayer = MediaPlayer.create(StrategoActivity.this, soundID);
     	soundPlayer.start();
     }
+    
+    @Override
+	protected void onWrite(String data) 
+	{
+		//Log.d("Bluetooth Logs", "Wrote from Stratego: " + data);
+	}
+
+
+	@Override
+	protected void onRead(String data)
+	{
+		Log.d("Bluetooth Logs", "Read from Stratego: " + data);
+		//try
+		{
+			String[] components = data.split(DBInterface.GRID_ROW_SEPARATOR);
+			switch (components[0])
+			{
+				case PLACEMENT_SIGNAL:
+				{
+					receivePlacement(components);
+					break;
+				}
+				case MOVE_SIGNAL:
+				{
+					String[] movement = components[1].split(DBInterface.GRID_ITEM_SEPARATOR);
+					int attackVert = Integer.parseInt(movement[0]);
+					int attackHoriz = Integer.parseInt(movement[1]);
+					int defendVert = Integer.parseInt(movement[2]);
+					int defendHoriz = Integer.parseInt(movement[3]);
+					currentAttacker = gridPieces[attackVert][attackHoriz];
+					evaluateMove(gridButtons[defendVert][defendHoriz]);
+					break;
+				}
+				default:
+				{
+					Log.d("Bluetooth Logs", "Stratego read taken as name");
+					getIntent().putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", data);
+					playerTwoName = data;
+					playerTwoDisplay.setText(playerTwoName);
+					break;
+				}
+			}
+		}
+		//catch
+	}
+	
+	@Override
+	protected void onConnectionLost()
+	{
+		Toast.makeText(this, "The connection was lost.", Toast.LENGTH_LONG).show();
+		endMatch.onClick(null);
+	}
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) 
