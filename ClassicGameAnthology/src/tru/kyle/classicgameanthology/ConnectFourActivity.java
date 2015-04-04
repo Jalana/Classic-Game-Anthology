@@ -23,7 +23,6 @@ import tru.kyle.classicgameanthology.FileSaver.GameByLayout;
 import tru.kyle.databases.DBInterface;
 import tru.kyle.mylists.MyQueue;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -39,7 +38,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -51,7 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class ConnectFourActivity extends Activity 
+public class ConnectFourActivity extends BaseActivity 
 {
 	protected static final String[][] EXTRAS = null;
 	
@@ -79,6 +77,9 @@ public class ConnectFourActivity extends Activity
 	boolean gameEnded = false;
 	boolean canPressButton;
 	boolean usingGuestNames = false;
+	boolean usingBluetooth = false;
+	
+	private int thisTurn = 1;
 	
 	int currentTurn = 1;
 	char currentMark;
@@ -151,6 +152,21 @@ public class ConnectFourActivity extends Activity
     	filenameNames = getString(R.string.filenameNames);
     	newMatch = intent.getBooleanExtra(MainMenuActivity.NEW_MATCH_KEY, false);
     	intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, false);
+    	usingBluetooth = intent.getBooleanExtra(MainMenuActivity.USING_BLUETOOTH_KEY, false);
+    	if (usingBluetooth == true)
+    	{
+    		Log.d("Bluetooth Logs", "Host status: " + 
+    				((Boolean)intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false)).toString());
+    		if (intent.getBooleanExtra(MainMenuActivity.IS_HOST_KEY, false) == true)
+    		{
+    			thisTurn = 1;
+    		}
+    		else
+    		{
+    			thisTurn = 2;
+    			canPressButton = false;
+    		}
+    	}
     	
     	playerOneName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1");
     	playerTwoName = intent.getStringExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2");
@@ -231,7 +247,10 @@ public class ConnectFourActivity extends Activity
 		}
 		
 		gameInProgress = true;
-		canPressButton = true;
+		if (usingBluetooth == false || thisTurn == currentTurn)
+		{
+			canPressButton = true;
+		}
 		soundPlayer = null;
 	}
 	
@@ -671,93 +690,100 @@ public class ConnectFourActivity extends Activity
         		endMatch.onClick(v);
         	}
         	
-        	if (canPressButton == true)
+        	if (canPressButton == true)// || (usingBluetooth == true && currentTurn != thisTurn))
         	{
-        		canPressButton = false;
-            	
             	Button B = (Button) v;
-            	boolean result = false;
-            	boolean status = false;
-            	int presentTurn = currentTurn;
-            	turnCount++;
-            	
-            	B = checkGravity(B);
-            	int value = addMark(presentTurn, B);
-            	B.setClickable(false);
-            	//B.setBackgroundColor(Color.WHITE);
-            	if (previousMove == null)
-            	{
-            		previousMove = B;
-            	}
-            	highlightPrevious(B);
-            	previousMove = B;
-            	
-            	int count = 0;
-            	int count2 = 0;
-            	for (count = 0; count < buttons.length && status == false; count++)
-            	{
-            		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
-            		{
-            			if (buttons[count][count2] == B)
-            			{
-            				pointsPlaced[count][count2] = value;
-            				status = true;
-            			}
-            		}
-            	}
-            	count--;
-            	count2--;
-            	//This decrement is to prevent an off-by-one error. When the for loops end, 
-            	//		the counts are each one too high relative to the actual index of the button.
-            	if (lastLines.isEmpty() == false)
-            	{
-            		clearLineHighlights();
-            	}
-            	
-            	result = loopLines(count, count2, presentTurn);
-            	if (lastLines.isEmpty() == false && true == highlightMoves)
-            	{
-            		highlightMoves(B);
-            	}
-            	if (lastLines.isEmpty() == false && true == highlightMoves)
-            	{
-            		playSound(MainMenuActivity.WARNING_SOUND);
-            	}
-            	else
-            	{
-            		playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
-            	}
-            	
-            	swapTurn();
-            	
-            	if (result == true)
-            	{
-            		displayWinner(presentTurn);
-            	}
-            	else if (turnCount == TURN_LIMIT)
-            	{
-            		displayTie();
-            	}
-            	else
-            	{
-            		new CountDownTimer(500, 300)
-                	{
-            			@Override
-            			public void onTick(long millisUntilFinished) 
-            			{
-            				
-            			}
-
-            			@Override
-            			public void onFinish() 
-            			{
-            				canPressButton = true;
-            			}
-                	}.start();
-            	}
+            	evaluateMove(B);
         	}
         }
     };
+    
+    public void evaluateMove(Button B)
+    {
+    	canPressButton = false;
+    	boolean result = false;
+    	boolean status = false;
+    	int presentTurn = currentTurn;
+    	turnCount++;
+    	
+    	B = checkGravity(B);
+    	int value = addMark(presentTurn, B);
+    	B.setClickable(false);
+    	//B.setBackgroundColor(Color.WHITE);
+    	if (previousMove == null)
+    	{
+    		previousMove = B;
+    	}
+    	highlightPrevious(B);
+    	previousMove = B;
+    	
+    	int count = 0;
+    	int count2 = 0;
+    	for (count = 0; count < buttons.length && status == false; count++)
+    	{
+    		for (count2 = 0; count2 < buttons[count].length && status == false; count2++)
+    		{
+    			if (buttons[count][count2] == B)
+    			{
+    				pointsPlaced[count][count2] = value;
+    				status = true;
+    			}
+    		}
+    	}
+    	count--;
+    	count2--;
+    	//This decrement is to prevent an off-by-one error. When the for loops end, 
+    	//		the counts are each one too high relative to the actual index of the button.
+    	if (lastLines.isEmpty() == false)
+    	{
+    		clearLineHighlights();
+    	}
+    	
+    	result = loopLines(count, count2, presentTurn);
+    	if (lastLines.isEmpty() == false && true == highlightMoves)
+    	{
+    		highlightMoves(B);
+    		playSound(MainMenuActivity.WARNING_SOUND);
+    	}
+    	else
+    	{
+    		playSound(MainMenuActivity.NORMAL_MOVE_SOUND);
+    	}
+    	
+    	if (usingBluetooth == true && currentTurn == thisTurn)
+    	{
+    		String data = count + DBInterface.GRID_ITEM_SEPARATOR + count2;
+    		bluetooth.write(data);
+    	}
+    	
+    	swapTurn();
+    	
+    	if (result == true)
+    	{
+    		displayWinner(presentTurn);
+    	}
+    	else if (turnCount == TURN_LIMIT)
+    	{
+    		displayTie();
+    	}
+    	else if (usingBluetooth == false || currentTurn == thisTurn)
+    	{
+    		new CountDownTimer(500, 300)
+        	{
+    			@Override
+    			public void onTick(long millisUntilFinished) 
+    			{
+    				
+    			}
+
+    			@Override
+    			public void onFinish() 
+    			{
+    				canPressButton = true;
+    			}
+        	}.start();
+    	}
+    }
     
     public void highlightPrevious(Button B)
     {
@@ -811,7 +837,8 @@ public class ConnectFourActivity extends Activity
 		@Override
 		public void onClick(View v) 
 		{
-			if (usingGuestNames == false && gameInProgress == true && gameEnded == false)
+			if (usingGuestNames == false && gameInProgress == true 
+					&& gameEnded == false && usingBluetooth == false)
 			{
 				saveFile();
 				//Create a dialog to prompt the user for a filename.
@@ -915,7 +942,26 @@ public class ConnectFourActivity extends Activity
     		winners = null;
     	}
     	
-    	if (usingGuestNames == false)
+    	if (usingBluetooth == true)
+    	{
+    		bluetooth.toggleHost();
+    		if (thisTurn != result)
+    		{
+    			winners = null;
+    		}
+    		
+    		if (thisTurn == 1)
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+            			new String[]{playerOneName}, THIS_GAME, winners);
+    		}
+    		else
+    		{
+    			DBInterface.updatePlayerScores(getApplicationContext(), 
+    					new String[]{playerTwoName}, THIS_GAME, winners);
+    		}
+    	}
+    	else if (usingGuestNames == false)
     	{
     		DBInterface.updatePlayerScores(getApplicationContext(), 
         			new String[]{playerOneName, playerTwoName}, THIS_GAME, winners);
@@ -951,7 +997,15 @@ public class ConnectFourActivity extends Activity
 					
 				}
 			}
-			mainLayout.setOnClickListener(null);
+			if (mainLayout != null)
+			{
+				mainLayout.setOnClickListener(null);
+			}
+			Intent intent = new Intent(ConnectFourActivity.this, MainMenuActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, 
+					getIntent().getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY));
+			startActivity(intent);
 			ConnectFourActivity.this.finish();
 		}
 	};
@@ -1073,6 +1127,7 @@ public class ConnectFourActivity extends Activity
     	soundPlayer.start();
     }
 
+	/*
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) 
     {
@@ -1087,19 +1142,60 @@ public class ConnectFourActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+    */
+	
+	@Override
+	protected void onWrite(String data) 
+	{
+		//Log.d("Bluetooth Logs", "Wrote from ConnectFour: " + data);
+	}
+
+
+	@Override
+	protected void onRead(String data)
+	{
+		Log.d("Bluetooth Logs", "Read from ConnectFour: " + data);
+		try
+		{
+			String[] nextMove = data.split(DBInterface.GRID_ITEM_SEPARATOR);
+			int vertIndex = Integer.parseInt(nextMove[0]);
+			int horizIndex = Integer.parseInt(nextMove[1]);
+			if (gameInProgress == true && thisTurn != currentTurn && canPressButton == false)
+			{
+				evaluateMove(buttons[vertIndex][horizIndex]);
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			Log.d("Bluetooth Logs", "ConnectFour read taken as name");
+			getIntent().putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", data);
+			playerTwoName = data;
+			playerTwoDisplay.setText(playerTwoName);
+		}
+	}
+	
+	@Override
+	protected void onConnectionLost()
+	{
+		Toast.makeText(this, "The connection was lost.", Toast.LENGTH_LONG).show();
+		endMatch.onClick(null);
+	}
     
-    public static Integer[] getPlayerCounts()
+    protected static Integer[] getPlayerCounts()
     {
     	return PLAYERS;
     }
     
-    public static String[][] getExtras()
+    protected static String[][] getExtras()
     {
     	return EXTRAS;
     }
     
-    public static String[] getBoolExtras()
+    protected static String[] getBoolExtras()
     {
     	return BOOLEAN_EXTRAS;
     }
+
+
+	
 }

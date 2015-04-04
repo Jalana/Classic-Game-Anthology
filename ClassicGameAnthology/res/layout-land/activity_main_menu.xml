@@ -44,7 +44,7 @@
         android:layout_above="@+id/main_menu_loadSave"
         android:layout_alignParentLeft="true"
         android:text=" Select Saved Game? "
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
     <Button
         android:id="@+id/main_menu_loadSave"
@@ -100,7 +100,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:text=" Other Options: "
-        android:textSize="25sp" />
+        android:textSize="22sp" />
 
     <LinearLayout
         android:id="@+id/playerLayout"
@@ -150,7 +150,7 @@
                 android:checkMark="@drawable/main_menu_checkbox"
                 android:checked="false"
                 android:text="@string/extras_box_1"
-                android:textSize="17sp" />
+                android:textSize="16sp" />
 
             <CheckedTextView
                 android:id="@+id/main_menu_extrasCheckedView_2"
@@ -160,7 +160,7 @@
                 android:checkMark="@drawable/main_menu_checkbox"
                 android:checked="false"
                 android:text="@string/extras_box_2"
-                android:textSize="17sp" />
+                android:textSize="16sp" />
         </RelativeLayout>
 
         <Spinner
@@ -184,10 +184,20 @@
         android:id="@+id/main_menu_newMatch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/playerLayout"
-        android:layout_toRightOf="@+id/main_menu_loadSave"
         android:background="@drawable/button_border_menu_blue"
         android:text=" New Match "
         android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/main_menu_bluetoothMatch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/playerLayout"
+        android:layout_below="@+id/playerLayout"
+        android:background="@drawable/button_border_menu_red"
+        android:text=" Versus... "
+        android:textSize="22sp" />
 
 </RelativeLayout>

@@ -1252,7 +1252,7 @@ public class MastermindActivity extends Activity
 		}
 		else
 		{
-			displayCode();
+			//displayCode();
 		}
 		
 		for (int count = 0; count < currentRow.length; count++)
@@ -1503,21 +1503,6 @@ public class MastermindActivity extends Activity
 		getMenuInflater().inflate(R.menu.mastermind, menu);
 		return true;
 	}
-	
-	@Override
-    public boolean onOptionsItemSelected(MenuItem item) 
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_menu_about) 
-        {
-        	ActionMenu.displayAboutDialog(this);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 	
 	protected static Integer[] getPlayerCounts()
     {

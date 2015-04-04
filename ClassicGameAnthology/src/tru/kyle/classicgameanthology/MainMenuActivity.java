@@ -24,8 +24,9 @@ import java.util.List;
 
 import tru.kyle.databases.DBInterface;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,13 +39,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 //		Useful links for maintaining Bluetooth across activities:
 //	http://developer.android.com/guide/components/services.html
@@ -201,12 +202,15 @@ Thread bgThread = new Thread(new Runnable()
  */
 
 
-public class MainMenuActivity extends Activity 
+public class MainMenuActivity extends BaseActivity 
 {
 	public final static String PACKAGE_NAME = "tru.kyle.classicgameanthology";
 	public final static String GAME_FILENAME_KEY = PACKAGE_NAME + ".gameFilename";
 	public final static String BASE_PLAYER_FILENAME_KEY = PACKAGE_NAME + ".player_";
 	public final static String NEW_MATCH_KEY = PACKAGE_NAME + ".newMatch";
+	public final static String USING_BLUETOOTH_KEY = PACKAGE_NAME + ".usingBluetooth";
+	public final static String OTHER_DEVICE_KEY = PACKAGE_NAME + ".otherDevice";
+	public final static String IS_HOST_KEY = PACKAGE_NAME + ".host";
 	public final static String EXTRA_STRING_BASE_KEY = PACKAGE_NAME + ".extra_string_";
 	public final static String EXTRA_BOOL_BASE_KEY = PACKAGE_NAME + ".extra_bool_";
 	
@@ -224,6 +228,7 @@ public class MainMenuActivity extends Activity
 	
 	AlertDialog mainMenuDialog;
 	AlertDialog deleteSaveDialog;
+	AlertDialog bluetoothDialog;
 	TextView playerOneDisplay;
 	TextView playerTwoDisplay;
 	boolean activityShift = false;
@@ -239,12 +244,18 @@ public class MainMenuActivity extends Activity
 	CheckedTextView[] extraCheckBoxes;
 	Spinner savedGamesSpinner;
 	
+	Spinner deviceSpinner;
+	BluetoothDevice chosenDevice;
+	String opponentName;
+	int[] gameOptionsFromHost;
+	
 	Button newMatch;
 	Button savedGames;
 	Button deleteSave;
 	Button goToPlayers;
+	Button versusMatch;
 	
-	Player[] players;
+	String[] players;
 	boolean[] isPlaying;
 	
 	int playerLimit = 2;
@@ -297,7 +308,7 @@ public class MainMenuActivity extends Activity
 			//smallSpinnerItem = (TextView) findViewById(smallSpinnerItemID);
 		}
     	
-    	players = FileSaver.getPlayerList(getApplicationContext());
+    	players = DBInterface.getNames(getApplicationContext(), null);
     	isPlaying = new boolean[players.length];
     	for (int count = 0; count < isPlaying.length; count++)
     	{
@@ -328,25 +339,17 @@ public class MainMenuActivity extends Activity
     	savedGames = (Button) findViewById(R.id.main_menu_loadSave);
     	goToPlayers = (Button) findViewById(R.id.main_menu_goToPlayers);
     	deleteSave = (Button) findViewById(R.id.main_menu_deleteSave);
+    	versusMatch = (Button) findViewById(R.id.main_menu_bluetoothMatch);
     	newMatch.setOnClickListener(newMatchListener);
     	savedGames.setOnClickListener(loadGameListener);
     	goToPlayers.setOnClickListener(goToPlayersListener);
     	deleteSave.setOnClickListener(deleteGameListener);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) 
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
+    	versusMatch.setOnClickListener(bluetooth_match_listener);
     }
     
     @Override
 	protected void onStart() 
     {
-		// TODO Auto-generated method stub
 		super.onStart();
 		Log.d("Life Cycle", "Main Activity: onStart");
 		//This is called between onCreate() and onResume().
@@ -356,7 +359,6 @@ public class MainMenuActivity extends Activity
 	@Override
 	protected void onResume() 
 	{
-		// TODO Auto-generated method stub
 		super.onResume();
 		Log.d("Life Cycle", "Main Activity: onResume");
 		//This method is called every time the activity hits the foreground.
@@ -368,6 +370,20 @@ public class MainMenuActivity extends Activity
     		playerSpinners[count].setOnItemSelectedListener(player_listener);
     	}
     	addGamesToSpinner();
+    	Intent launchIntent = getIntent();
+    	if (launchIntent.hasExtra(MainMenuActivity.OTHER_DEVICE_KEY))
+    	{
+	    	chosenDevice = launchIntent.getParcelableExtra(MainMenuActivity.OTHER_DEVICE_KEY);
+	    	launchIntent.removeExtra(MainMenuActivity.OTHER_DEVICE_KEY);
+    	}
+    	if (chosenDevice == null)
+    	{
+    		Log.d("Main Menu", "No connected device at onResume()");
+    	}
+    	else
+    	{
+    		Log.d("Main Menu", "Connected to a device at onResume()");
+    	}
 	}
 	
 	
@@ -429,6 +445,7 @@ public class MainMenuActivity extends Activity
 	public void determineExtras()
     {
         String gameName = getClassName(FileSaver.Game.values()[currentGame]);
+        //Class<?> gameClass;
         Class<?> gameClass;
         playerOptions = null;
         boolExtras = null;
@@ -436,6 +453,7 @@ public class MainMenuActivity extends Activity
         try 
         {
 			gameClass = Class.forName(gameName);
+			
 			playerOptions = (Integer[]) gameClass.getDeclaredMethod(MainMenuActivity.GET_PLAYERS_METHOD)
 					.invoke(null);
 			boolExtras = (String[]) gameClass.getDeclaredMethod(MainMenuActivity.GET_BOOLS_METHOD)
@@ -481,6 +499,14 @@ public class MainMenuActivity extends Activity
         {
         	//If any games are made that allow for varying numbers of players, complete this section.
         	playerLimit = playerOptions[0];
+        	if (playerLimit == 1)
+        	{
+        		versusMatch.setVisibility(View.GONE);
+        	}
+        	else
+        	{
+        		versusMatch.setVisibility(View.VISIBLE);
+        	}
         }
         
         if (boolExtras != null)
@@ -552,7 +578,7 @@ public class MainMenuActivity extends Activity
 			{
 	        	if (players[tempCount] != null)
 	        	{
-	        		spinnerArray.add(players[tempCount].getName());
+	        		spinnerArray.add(players[tempCount]);
 	        	}
 			}
 	        playerSpinners[outerCount].setVisibility(View.VISIBLE);
@@ -688,9 +714,7 @@ public class MainMenuActivity extends Activity
 			{
 				activityShift = true;
 				
-				String className = getPackageName() + ".";
-				className += FileSaver.Game.values()[currentGame].toString();
-				className += FileSaver.ACTIVITY_SUFFIX;
+				String className = getClassName(FileSaver.Game.values()[currentGame]);
 				Intent intent;
 				try 
 				{
@@ -698,7 +722,7 @@ public class MainMenuActivity extends Activity
 					for (int count = 0; count < currentPlayers.length; count++)
 					{
 						intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + (count + 1), 
-								players[currentPlayers[count]].getName());
+								players[currentPlayers[count]]);
 					}
 					if (extras != null)
 					{
@@ -735,6 +759,220 @@ public class MainMenuActivity extends Activity
 			}
 		}
 	};
+	
+	private OnClickListener bluetooth_match_listener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v) 
+		{
+			if (bluetooth == null)
+			{
+				return;
+			}
+			
+			if (bluetooth.getAdapter().isEnabled() == false)
+			{
+				enableBluetooth();
+				return;
+			}
+			
+			if (bluetoothDialog != null && bluetoothDialog.isShowing() == true)
+			{
+				bluetoothDialog.dismiss();
+			}
+			
+			AlertDialog.Builder bluetoothBuilder = new AlertDialog.Builder(MainMenuActivity.this);
+			bluetoothBuilder.setTitle("Network Match");
+			if (chosenDevice == null)
+			{
+				bluetoothBuilder.setMessage("Not Connected");
+			}
+			else
+			{
+				bluetoothBuilder.setMessage("Connected to: " + chosenDevice.getName());
+			}
+			deviceSpinner = new Spinner(MainMenuActivity.this);
+			bluetoothBuilder.setView(deviceSpinner);
+			bluetoothBuilder.setCancelable(true);
+			if (bluetooth.isHost() == true && chosenDevice != null)
+			{
+				bluetoothBuilder.setPositiveButton("Launch " + FileSaver.Game.values()[currentGame].toString(), 
+						bluetooth_dialog_listener);
+			}
+			bluetoothBuilder.setNeutralButton("Find Opponents", bluetooth_dialog_listener);
+			bluetoothBuilder.setNegativeButton("Connect to Opponent", bluetooth_dialog_listener);
+			
+			bluetoothDialog = bluetoothBuilder.show();
+			bluetoothDialog.setCanceledOnTouchOutside(true);
+			
+			/*
+			if (bluetooth.isHost() == true && chosenDevice != null)
+			{
+				bluetoothDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(null);
+			}
+			bluetoothDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(null);
+			bluetoothDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(null);
+			*/
+		}
+	};
+	
+	private DialogInterface.OnClickListener bluetooth_dialog_listener = new DialogInterface.OnClickListener()
+	{
+		@Override
+		public void onClick(DialogInterface dialog, int which) 
+		{
+			switch (which)
+			{
+			case DialogInterface.BUTTON_POSITIVE:
+			{
+				//Launch game, if possible
+				if (chosenDevice != null)
+				{
+					bluetoothDialog.dismiss();
+					launchBluetoothGame(bluetooth.isHost());
+				}
+				break;
+			}
+			case DialogInterface.BUTTON_NEUTRAL:
+			{
+				bluetooth.stopThreads();
+				chosenDevice = null;
+				startDiscovery();
+				break;
+			}
+			case DialogInterface.BUTTON_NEGATIVE:
+			{
+				if (availableDevices.size() > 0 && deviceSpinner.getAdapter() != null && deviceSpinner.getAdapter().getCount() > 0)
+				{
+					BluetoothDevice device = availableDevices.get(deviceSpinner.getSelectedItemPosition());
+					bluetooth.connect(device);
+				}
+				else
+				{
+					Log.d("Bluetooth Logs", "Tried to connect with no devices available.");
+				}
+				break;
+			}
+			}
+		}
+	};
+	
+	private void launchBluetoothGame(boolean isHost)
+	{
+		activityShift = true;
+		
+		String className;
+		Intent intent;
+		try 
+		{
+			if (opponentName == null || opponentName == "")
+			{
+				Log.d("Main Menu", "Error: opponent's name was not received over Bluetooth");
+				opponentName = chosenDevice.getName();
+			}
+			if (bluetooth.isHost() == true)
+			{
+				Log.d("Main Menu", "Launching as host");
+				className = getClassName(FileSaver.Game.values()[currentGame]);
+				intent = new Intent(MainMenuActivity.this, Class.forName(className));
+				String extraInfo = "";
+				intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1", 
+						players[currentPlayers[0]]);
+				intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", 
+						opponentName);
+				extraInfo = players[currentPlayers[0]] + DBInterface.GRID_ROW_SEPARATOR;
+				extraInfo += currentGame + DBInterface.GRID_ITEM_SEPARATOR;
+				if (extras != null)
+				{
+					for (int count = 0; count < extras.length; count++)
+					{
+						intent.putExtra(MainMenuActivity.EXTRA_STRING_BASE_KEY + (count + 1), 
+								extras[count][extraSpinners[count].getSelectedItemPosition()]);
+						extraInfo += extraSpinners[count].getSelectedItemPosition() + DBInterface.GRID_ITEM_SEPARATOR;
+					}
+				}
+				if (boolExtras != null)
+				{
+					for (int count = 0; count < boolExtras.length; count++)
+					{
+						intent.putExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + (count + 1), 
+								extraCheckBoxes[count].isChecked());
+						if (extraCheckBoxes[count].isChecked() == true)
+						{
+							extraInfo += "1" + DBInterface.GRID_ITEM_SEPARATOR;
+						}
+						else
+						{
+							extraInfo += "0" + DBInterface.GRID_ITEM_SEPARATOR;
+						}
+					}
+				}
+				//Drop the trailing marker and send the data to the other device.
+				extraInfo = extraInfo.substring(0, extraInfo.length() - DBInterface.GRID_ITEM_SEPARATOR.length());
+				bluetooth.write(extraInfo);
+			}
+			else
+			{
+				Log.d("Main Menu", "Launching as client");
+				className = getClassName(FileSaver.Game.values()[gameOptionsFromHost[0]]);
+				determineExtras();
+				intent = new Intent(MainMenuActivity.this, Class.forName(className));
+				
+				intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "1", 
+						opponentName);
+				intent.putExtra(MainMenuActivity.BASE_PLAYER_FILENAME_KEY + "2", 
+						players[currentPlayers[0]]);
+				int index = 1;
+				if (extras != null)
+				{
+					for (int count = 0; count < extras.length; count++)
+					{
+						intent.putExtra(MainMenuActivity.EXTRA_STRING_BASE_KEY + (count + 1), 
+								extras[count][gameOptionsFromHost[index]]);
+						index++;
+					}
+				}
+				if (boolExtras != null)
+				{
+					for (int count = 0; count < boolExtras.length; count++)
+					{
+						if (gameOptionsFromHost[index] == 1)
+						{
+							intent.putExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + (count + 1), true);
+						}
+						else
+						{
+							intent.putExtra(MainMenuActivity.EXTRA_BOOL_BASE_KEY + (count + 1), false);
+						}
+						index++;
+					}
+				}
+				bluetooth.write(players[currentPlayers[0]]);
+			}
+			
+			if (bluetoothDialog != null && bluetoothDialog.isShowing())
+			{
+				bluetoothDialog.dismiss();
+			}
+			
+			if (bluetooth.isHost() != isHost)
+			{
+				Log.d("Bluetooth Logs", "Error: bluetooth.isHost() != host parameter");
+			}
+			intent.putExtra(MainMenuActivity.OTHER_DEVICE_KEY, chosenDevice);
+			intent.putExtra(MainMenuActivity.IS_HOST_KEY, bluetooth.isHost());
+			intent.putExtra(MainMenuActivity.NEW_MATCH_KEY, true);
+			intent.putExtra(MainMenuActivity.USING_BLUETOOTH_KEY, true);
+			startActivity(intent);
+			//MainMenuActivity.this.finish();
+		} 
+		catch (ClassNotFoundException e) 
+		{
+			Log.d("Main Menu", "Unable to find class name.");
+			e.printStackTrace();
+			activityShift = false;
+		}
+	}
 	
 	//A false return means that no conflicts were detected.
 	public boolean checkPlayerConflicts()
@@ -868,13 +1106,19 @@ public class MainMenuActivity extends Activity
 		{
 			Log.d("Life Cycle", "isFinishing() in MainMenuActivity (onPause) returned true.");
 		}
+		else
+		{
+			if (chosenDevice != null)
+			{
+				getIntent().putExtra(MainMenuActivity.OTHER_DEVICE_KEY, chosenDevice);
+			}
+		}
 	}
 
 	//The onStop() function is used to dismiss any dialogs that may have been created.
 	@Override
 	protected void onStop() 
 	{
-		// TODO Auto-generated method stub
 		super.onStop();
 		if (mainMenuDialog != null && mainMenuDialog.isShowing())
 		{
@@ -894,7 +1138,6 @@ public class MainMenuActivity extends Activity
 	@Override
 	protected void onDestroy() 
 	{
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		Log.d("Life Cycle", "Main Activity: onDestroy");
 		if (isFinishing() == true)
@@ -907,12 +1150,19 @@ public class MainMenuActivity extends Activity
 	@Override
 	protected void onRestart() 
 	{
-		// TODO Auto-generated method stub
 		super.onRestart();
 		Log.d("Life Cycle", "Main Activity: onRestart");
 		//This is called when the activity is being resumed from onStop().
 		//It then goes to onStart() and onResume().
 	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) 
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) 
@@ -928,4 +1178,89 @@ public class MainMenuActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    @Override
+    protected void onDiscoveryEnabled(int howLong)
+    {
+    	super.onDiscoveryEnabled(howLong);
+    	bluetooth_match_listener.onClick(null);
+    }
+    
+    @Override
+    protected void onConnection(BluetoothDevice device)
+    {
+    	Log.d("Bluetooth Logs", "onConnection() in Main menu");
+    	if (bluetooth.isHost() == false)
+    	{
+    		bluetooth.write(players[currentPlayers[0]] + DBInterface.GRID_ROW_SEPARATOR);
+    	}
+    	
+    	chosenDevice = device;
+    	Toast.makeText(this, "Connection formed with: " + chosenDevice.getName(), Toast.LENGTH_SHORT).show();
+    	bluetooth_match_listener.onClick(null);
+    }
+    
+    @Override
+    protected void onDeviceFound(Context context, Intent intent)
+    {
+    	super.onDeviceFound(context, intent);
+    	if (deviceSpinner != null)
+    	{
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					MainMenuActivity.this, android.R.layout.simple_spinner_item, deviceNames);
+		    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			deviceSpinner.setAdapter(adapter);
+    	}
+    }
+
+	@Override
+	protected void onWrite(String data) 
+	{
+		Log.d("Bluetooth Logs", "MainMenu wrote: " + data);
+	}
+
+
+	@Override
+	protected void onRead(String data) 
+	{
+		Log.d("Bluetooth Logs", "MainMenu read: " + data);
+		String[] dataPieces = data.split(DBInterface.GRID_ROW_SEPARATOR);
+		opponentName = dataPieces[0];
+		try
+		{
+			String[] values = dataPieces[1].split(DBInterface.GRID_ITEM_SEPARATOR);
+			if (values.length > 1)
+			{
+				currentGame = Integer.parseInt(values[0]);
+				setExtraViews();
+				gameOptionsFromHost = new int[values.length];
+				gameOptionsFromHost[0] = currentGame;
+				for (int count = 1; count < values.length; count++)
+				{
+					gameOptionsFromHost[count] = Integer.parseInt(values[count]);
+				}
+				launchBluetoothGame(false);
+			}
+			else
+			{
+				Log.d("Bluetooth Logs", "Read info was taken as a name in MainMenu.");
+				opponentName = data;
+			}
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			Log.d("Main Menu", "Out of bounds in onRead()");
+		}
+	}
+	
+	@Override
+	protected void onConnectionLost()
+	{
+		bluetooth.stopThreads();
+		chosenDevice = null;
+		if (bluetoothDialog != null && bluetoothDialog.isShowing() == true)
+		{
+			bluetoothDialog.dismiss();
+		}
+	}
 }

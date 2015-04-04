@@ -54,6 +54,11 @@
             android:name=".StrategoActivity"
             android:label="@string/title_activity_stratego" >
         </activity>
+        
+        <service
+            android:name=".BluetoothService"
+            >
+        </service>
     </application>
 
 </manifest>
